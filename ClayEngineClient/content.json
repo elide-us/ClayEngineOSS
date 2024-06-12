@@ -1,0 +1,19 @@
+{
+  "fonts": [
+    "Consolas_10",
+    "Consolas_16",
+    "Consolas_24",
+    "Mason_24"
+  ],
+  "models": [
+    "BlueGem",
+    "Gem08-MO"
+  ],
+  "sprites": [
+    "Cursor",
+    "UIElements",
+    "Pixel",
+    "GoldBox",
+    "Controls"
+  ]
+}
