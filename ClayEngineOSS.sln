@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34714.143
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClayEngineLibrary", "ClayEngineLibrary\ClayEngineLibrary.vcxproj", "{56A8D024-F5F5-4DB5-856B-DCECB81D40BF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClayEngineClient", "ClayEngineClient\ClayEngineClient.vcxproj", "{421E378A-7206-4FC2-9B03-5A5FD381CDC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9716CAB8-F207-4722-A8C8-AB654BAF3197}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		ClayEngineClient.props = ClayEngineClient.props
+		ClayEngineHeadless.props = ClayEngineHeadless.props
+		ClayEngineLibrary.props = ClayEngineLibrary.props
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClayEngineHeadless", "ClayEngineHeadless\ClayEngineHeadless.vcxproj", "{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "DirectXTK\DirectXTK_Desktop_2022.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56A8D024-F5F5-4DB5-856B-DCECB81D40BF}.Debug|x64.ActiveCfg = Debug|x64
+		{56A8D024-F5F5-4DB5-856B-DCECB81D40BF}.Debug|x64.Build.0 = Debug|x64
+		{56A8D024-F5F5-4DB5-856B-DCECB81D40BF}.Release|x64.ActiveCfg = Release|x64
+		{56A8D024-F5F5-4DB5-856B-DCECB81D40BF}.Release|x64.Build.0 = Release|x64
+		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Debug|x64.ActiveCfg = Debug|x64
+		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Debug|x64.Build.0 = Debug|x64
+		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Release|x64.ActiveCfg = Release|x64
+		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Release|x64.Build.0 = Release|x64
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x64.ActiveCfg = Debug|x64
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x64.Build.0 = Debug|x64
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x64.ActiveCfg = Release|x64
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x64.Build.0 = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.ActiveCfg = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.Build.0 = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.ActiveCfg = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3018EA8A-5F7C-44B1-B7BB-11391A115AEF}
+	EndGlobalSection
+EndGlobal

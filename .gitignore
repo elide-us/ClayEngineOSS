@@ -30,3 +30,20 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio
+.vs/
+x64/
+*.user
+
+*.pdb
+*.ipdb
+*.iobj
+*.log
+*.tlog
+*.ilk
+*.recipe
+
+#ClayEngine
+Artifacts/
+DirectXTK/
