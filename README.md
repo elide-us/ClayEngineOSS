@@ -10,6 +10,10 @@ A game engine for Windows
 
 #### GAME/BOLTS/ClayEngine A DirectX MMO Engine
 
+Eliminate the editor! Build the game in the game.
+
+Advanced debugging features allow for limitless game configurations from single player to massive scale complex network infrastructure.s
+
 Unleash Your Creativity with our GAME Engine: Craft captivating stories, quests, characters, and world events effortlessly.
 
 Empower Your Vision with BOLTS: Seamlessly build massive scale client-server game systems with ease.
