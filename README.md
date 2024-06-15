@@ -1,4 +1,13 @@
 # ClayEngineOSS
+A game engine for Windows
+
+# Features
+- DirectX 11/12, CUDA
+- WinSocks2 NBIO/IOCP
+- Client/Server (MMO)
+- Voxel LOD
+- ARPG systems
+
 #### GAME/BOLTS/ClayEngine A DirectX MMO Engine
 
 Unleash Your Creativity with our GAME Engine: Craft captivating stories, quests, characters, and world events effortlessly.
