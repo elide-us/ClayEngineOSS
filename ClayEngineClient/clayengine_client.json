@@ -1,5 +1,9 @@
 {
-  "appmode": "client",
+  "title": "ClayEngine Client Prototype - Milestone 0.0.2",
+  "video": {
+    "height": 1080,
+    "width": 1920
+  },
   "control": {
     "move_backward": "d",
     "move_forward": "e",
@@ -9,13 +13,5 @@
   "network": {
     "server_addr": "73.210.118.242",
     "server_port": 48000
-  },
-  "video": {
-    "height": 1080,
-    "width": 1920
-  },
-  "window": {
-    "title": "ClayEngine Client Prototype - Milestone 0.0.2",
-    "class": "ClayEngineClientWindowClass"
   }
 }

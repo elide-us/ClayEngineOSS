@@ -22,19 +22,19 @@
 
 namespace ClayEngine
 {
-	using Function = std::function<void()>;
-	using Functions = std::vector<Function>;
+	using Function = ::std::function<void()>;
+	using Functions = ::std::vector<Function>;
 
 	/// <summary>
 	/// Stores and provides raw pointers to services created by this Service, but owned by other objects
 	/// </summary>
 	class Services
 	{
-		using Type = std::type_index;
+		using Type = ::std::type_index;
 		using Object = void*;
-		using ServicesMap = std::map<Type, Object>;
-		using Affinity = std::thread::id;
-		using ThreadMap = std::map<Affinity, ServicesMap>;
+		using ServicesMap = ::std::map<Type, Object>;
+		using Affinity = ::std::thread::id;
+		using ThreadMap = ::std::map<Affinity, ServicesMap>;
 
 		//inline static ServicesMap m_services = {};
 		inline static ThreadMap m_services = {};
@@ -48,9 +48,9 @@ namespace ClayEngine
 		/// validate if the pointer is valid before using it.
 		/// </summary>
 		template<typename T, typename... Args>
-		static std::unique_ptr<T> MakeService(Affinity threadId, Args&&... args)
+		static ::std::unique_ptr<T> MakeService(Affinity threadId, Args&&... args)
 		{
-			std::wstringstream wss;
+			::std::wstringstream wss;
 
 			auto i = m_services.find(threadId);
 			if (i == m_services.end())
@@ -60,12 +60,12 @@ namespace ClayEngine
 				m_services.emplace(threadId, m);
 				auto s = &m_services.begin()->second;
 
-				auto p = std::make_unique<T>(std::forward<Args>(args)...);
+				auto p = ::std::make_unique<T>(::std::forward<Args>(args)...);
 				auto o = reinterpret_cast<Object>(p.get());
 				auto t = Type(typeid(T));
 
 				s->emplace(t, o);
-				return std::move(p);
+				return ::std::move(p);
 			}
 			else
 			{

@@ -84,6 +84,7 @@
     <ClInclude Include="ClayMath.h" />
     <ClInclude Include="ClientCore.h" />
     <ClInclude Include="ContentSystem.h" />
+    <ClInclude Include="Definitions.h" />
     <ClInclude Include="DX11PrimitivePipeline.h" />
     <ClInclude Include="DX11Resources.h" />
     <ClInclude Include="DX11Textures.h" />

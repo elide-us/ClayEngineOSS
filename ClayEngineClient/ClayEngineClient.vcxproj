@@ -25,6 +25,7 @@
   <ItemGroup>
     <None Include="clayengine.json" />
     <None Include="clayengine_client.json" />
+    <None Include="clayengine_headless.json" />
     <None Include="content.json" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
