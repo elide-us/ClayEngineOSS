@@ -2,53 +2,53 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="ClayMath.cpp">
-      <Filter>Private\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11PrimitivePipeline.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Resources.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Textures.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ContentSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="InputSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage.cpp">
-      <Filter>Private\Utility</Filter>
-    </ClCompile>
-    <ClCompile Include="TimingSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem.cpp">
-      <Filter>Private\Systems</Filter>
+    <ClCompile Include="ClientCore.cpp">
+      <Filter>Private</Filter>
     </ClCompile>
     <ClCompile Include="HeadlessCore.cpp">
-      <Filter>Private\Cores</Filter>
-    </ClCompile>
-    <ClCompile Include="ClientCore.cpp">
-      <Filter>Private\Cores</Filter>
+      <Filter>Private</Filter>
     </ClCompile>
     <ClCompile Include="ServerCore.cpp">
-      <Filter>Private\Cores</Filter>
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="DX11PrimitivePipeline.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="DX11Resources.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="DX11Textures.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Private</Filter>
     </ClCompile>
     <ClCompile Include="Voxel.cpp">
-      <Filter>Private\Graphics</Filter>
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="TimingSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="ClayMath.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="Storage.cpp">
+      <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +115,9 @@
     <ClInclude Include="Voxel.h">
       <Filter>Public\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Definitions.h">
+      <Filter>Public\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Public">
@@ -126,26 +129,14 @@
     <Filter Include="Public\Graphics">
       <UniqueIdentifier>{2dbc48c1-4314-4641-af6f-ff974b7628e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Private\Graphics">
-      <UniqueIdentifier>{3de25272-4dfb-46c7-8331-66c26b0a05b1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Private\Utility">
-      <UniqueIdentifier>{a3ce5f9d-66c9-4c73-a4a0-c3d2108462fd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Public\Utility">
       <UniqueIdentifier>{0b4dd15b-d657-4dde-932b-ac898316c220}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Private\Systems">
-      <UniqueIdentifier>{96850cc3-0063-4c50-ad8f-30ef638587cc}</UniqueIdentifier>
     </Filter>
     <Filter Include="Public\Systems">
       <UniqueIdentifier>{20500867-94d0-4df6-ba08-c6ad0ef62635}</UniqueIdentifier>
     </Filter>
     <Filter Include="Public\Cores">
       <UniqueIdentifier>{919b316e-888c-4a6d-b97f-3a86ccd5f898}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Private\Cores">
-      <UniqueIdentifier>{1df977ec-13f4-4683-88fb-81522442c41c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

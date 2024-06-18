@@ -1,5 +1,6 @@
 #pragma once
 
+#include <thread>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -7,17 +8,20 @@
 
 namespace ClayEngine
 {
-	using Unicode = std::wstring;
-	using UnicodeStrings = std::vector<std::wstring>;
-	using String = std::string;
-	using Strings = std::vector<std::string>;
+	using Unicode = ::std::wstring;
+	using UnicodeStrings = ::std::vector<::std::wstring>;
+	using String = ::std::string;
+	using Strings = ::std::vector<::std::string>;
+	using StringStream = ::std::stringstream;
+	using StringStreamW = ::std::wstringstream;
+	using IStringStream = ::std::istringstream;
 
 	/// <summary>
 	/// Convert an ANSI string to a Unicode string
 	/// </summary>
 	inline Unicode ToUnicode(String string)
 	{
-		std::wstringstream wss;
+		StringStreamW wss;
 		wss << string.c_str();
 		return wss.str().c_str();
 	}
@@ -27,10 +31,10 @@ namespace ClayEngine
 	/// </summary>
 	inline void WriteLine(Unicode message)
 	{
-		std::wstringstream wss;
-		wss << L"[" << std::setfill(L'0') << std::setw(8) << std::this_thread::get_id() << L"] " << message << std::endl;
+		StringStreamW wss;
+		wss << L"[" << ::std::setfill(L'0') << ::std::setw(8) << ::std::this_thread::get_id() << L"] " << message << ::std::endl;
 
-		std::wcout << wss.str();
+		::std::wcout << wss.str();
 	}
 
 	/// <summary>
@@ -38,7 +42,7 @@ namespace ClayEngine
 	/// </summary>
 	inline String ToString(Unicode string)
 	{
-		std::stringstream ss;
+		StringStream ss;
 		ss << string.c_str();
 		return ss.str().c_str();
 	}
@@ -64,10 +68,10 @@ namespace ClayEngine
 
 		if (string.length() > 0)
 		{
-			std::istringstream iss(string);
+			IStringStream iss(string);
 			String s;
 
-			while (std::getline(iss, s, ' '))
+			while (::std::getline(iss, s, ' '))
 			{
 				v.push_back(s);
 			}
@@ -80,12 +84,12 @@ namespace ClayEngine
 	/// </summary>
 	inline Strings LineSplit(const String& line, const char delimiter)
 	{
-		std::istringstream iss(line); // Turn the line into an stringstream so we can getline on it
+		IStringStream iss(line); // Turn the line into an stringstream so we can getline on it
 
 		Strings v = {};
 		String s;
 
-		while (std::getline(iss, s, delimiter))
+		while (::std::getline(iss, s, delimiter))
 		{
 			v.push_back(s);
 		}

@@ -6,6 +6,7 @@
 /*                                                                            */
 /******************************************************************************/
 
+#include <memory>
 #include "Strings.h"
 #include "json.hpp"
 
@@ -46,15 +47,40 @@ namespace ClayEngine
 
 		public:
 			JsonFile(String filename) noexcept(false);
-			JsonFile(JsonFile const&) = delete;
-			JsonFile& operator=(JsonFile const&) = delete;
-			JsonFile(JsonFile&&) = default;
-			JsonFile& operator=(JsonFile&&) = default;
+			//JsonFile(JsonFile const&) = delete;
+			//JsonFile& operator=(JsonFile const&) = delete;
+			//JsonFile(JsonFile&&) = default;
+			//JsonFile& operator=(JsonFile&&) = default;
 			~JsonFile();
 
-			Document const& GetDocument() const;
+			// Helper functions to access document get/set for simple top layer values
+			template<typename T>
+			void SetValue(String key, T value)
+			{
+				m_document[key] = value;
+			}
+			template<typename T>
+			T GetValue(String key)
+			{
+				return m_document[key].get<T>();
+			}
+
+			// Helper function to access document get/set for simple first and second layer values
+			template<typename T>
+			void SetValue(String header, String key, T value)
+			{
+				m_document[header][key] = value;
+			}
+			template<typename T>
+			T GetValue(String header, String key)
+			{
+				return m_document[header][key].get<T>();
+			}
+
+			// Access the entire Document Object Model directly
+			const Document& GetDocument();
+			void SetDocument(Document doc);
 		};
 		using JsonFilePtr = std::unique_ptr<JsonFile>;
 		using JsonFileRaw = JsonFile*;
-	}
 }
