@@ -59,6 +59,7 @@ namespace ClayEngine
 	using JsonFileRaw = JsonFile*;
 }
 
+#pragma region Orphaned Code Fragments
 //TextFile(TextFile const&) = delete;
 //TextFile& operator=(TextFile const&) = delete;
 //TextFile(TextFile&&) = default;
@@ -67,3 +68,4 @@ namespace ClayEngine
 //JsonFile& operator=(JsonFile const&) = delete;
 //JsonFile(JsonFile&&) = default;
 //JsonFile& operator=(JsonFile&&) = default;
+#pragma endregion

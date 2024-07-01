@@ -7,15 +7,8 @@
 /*                                                                            */
 /******************************************************************************/
 
-#include <utility>
-#include <string>
-
 #include "Strings.h"
 #include "Services.h"
-
-#include "WindowSystem.h"
-//#include "TimingSystem.h"
-//#include "InputSystem.h"
 
 namespace ClayEngine
 {
@@ -35,10 +28,7 @@ namespace ClayEngine
         ClayEngineClient(HINSTANCE hInstance, UINT nCmdShow, LPWSTR nCmdLine, Unicode className, Unicode windowName);
         ~ClayEngineClient();
 
-        void SetAffinity(Affinity affinity)
-		{
-			m_affinity = affinity;
-		}
+        void SetAffinity(Affinity affinity);
     };
     using ClayEngineClientPtr = std::unique_ptr<ClayEngineClient>;
     using ClayEngineClientRaw = ClayEngineClient*;

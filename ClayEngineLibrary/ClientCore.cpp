@@ -1,17 +1,27 @@
 #include "pch.h"
 #include "ClientCore.h"
 
+#include "WindowSystem.h"
+//#include "InputSystem.h"
+//#include "TimingSystem.h"
+//#include "ContentSystem.h"
+//#include "RenderSystem.h"
+//#include "NetworkSystem.h"
+
+#pragma region ClayEngineClientEntryPoint Declaration
 namespace ClayEngine
 {
     /// <summary>
-    /// This is the main entry point for a client thread. It can be signaled to shuw down by setting the future.
+    /// This is the main entry point for a client thread. It can be signaled to shut down by setting the future.
     /// </summary>
     struct ClayEngineClientEntryPoint
     {
         int operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, Future future, ClayEngineClientRaw context);
     };
 }
+#pragma endregion
 
+#pragma region ClayEngineClient Definitions
 ClayEngine::ClayEngineClient::ClayEngineClient(HINSTANCE hInstance, UINT nCmdShow, LPWSTR nCmdLine, Unicode className, Unicode windowName)
     : m_instance_handle(hInstance), m_show_flags(nCmdShow), m_cmd_line(nCmdLine)
 {
@@ -24,12 +34,19 @@ ClayEngine::ClayEngineClient::~ClayEngineClient()
     m_thread.join();
 }
 
+void ClayEngine::ClayEngineClient::SetAffinity(Affinity affinity)
+{
+	m_affinity = affinity;
+}
+#pragma endregion
+
+#pragma region ClayEngineClientEntryPoint Definition
 int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, Future future, ClayEngineClientRaw context)
 {
     auto _affinity = std::this_thread::get_id();
     context->SetAffinity(_affinity);
 
-    // The following services need to be instantiated for a client:
+    // The following services need to be instantiated for a basic client:
     // WindowSystem, InputSystem, TimingSystem, ContentSystem, RenderSystem and NetworkSystem
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
@@ -56,3 +73,4 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
 
     return 0;
 }
+#pragma endregion
