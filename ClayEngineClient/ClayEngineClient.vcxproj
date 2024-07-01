@@ -23,10 +23,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="clayengine.json" />
-    <None Include="clayengine_client.json" />
-    <None Include="clayengine_headless.json" />
-    <None Include="content.json" />
+    <CopyFileToFolders Include="clayengine.json">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -2,52 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="Storage.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
     <ClCompile Include="ClientCore.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="HeadlessCore.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerCore.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11PrimitivePipeline.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Resources.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Textures.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="Voxel.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="ContentSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="InputSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="NetworkSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="TimingSystem.cpp">
       <Filter>Private</Filter>
     </ClCompile>
     <ClCompile Include="WindowSystem.cpp">
       <Filter>Private</Filter>
     </ClCompile>
-    <ClCompile Include="ClayMath.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="Storage.cpp">
+    <ClCompile Include="ClayEngine.cpp">
       <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
@@ -55,88 +19,42 @@
     <ClInclude Include="ClayEngine.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="ClayMath.h">
-      <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="DX11PrimitivePipeline.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DX11Resources.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DX11Textures.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Platform.h">
-      <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Random.h">
-      <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Services.h">
-      <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderSystem.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Public\Graphics</Filter>
+    <ClInclude Include="ClientCore.h">
+      <Filter>Public</Filter>
     </ClInclude>
     <ClInclude Include="Strings.h">
-      <Filter>Public\Utility</Filter>
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="Services.h">
+      <Filter>Public</Filter>
     </ClInclude>
     <ClInclude Include="Storage.h">
-      <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="ContentSystem.h">
-      <Filter>Public\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="InputSystem.h">
-      <Filter>Public\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="NetworkSystem.h">
-      <Filter>Public\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="TimingSystem.h">
-      <Filter>Public\Systems</Filter>
+      <Filter>Public</Filter>
     </ClInclude>
     <ClInclude Include="WindowSystem.h">
-      <Filter>Public\Systems</Filter>
-    </ClInclude>
-    <ClInclude Include="ClientCore.h">
-      <Filter>Public\Cores</Filter>
-    </ClInclude>
-    <ClInclude Include="HeadlessCore.h">
-      <Filter>Public\Cores</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerCore.h">
-      <Filter>Public\Cores</Filter>
-    </ClInclude>
-    <ClInclude Include="Voxel.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Definitions.h">
-      <Filter>Public\Utility</Filter>
+      <Filter>Public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Public">
       <UniqueIdentifier>{4f35a41b-0986-480d-87e3-a4eedf82a7a3}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Private">
       <UniqueIdentifier>{94cb5c00-f187-4a39-b659-72bb9503d530}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Public\Graphics">
       <UniqueIdentifier>{2dbc48c1-4314-4641-af6f-ff974b7628e6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Public\Utility">
-      <UniqueIdentifier>{0b4dd15b-d657-4dde-932b-ac898316c220}</UniqueIdentifier>
+    <Filter Include="Private\Graphics">
+      <UniqueIdentifier>{174b755e-4b95-49c9-9060-e16475d083cf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Public\Systems">
-      <UniqueIdentifier>{20500867-94d0-4df6-ba08-c6ad0ef62635}</UniqueIdentifier>
+    <Filter Include="Private\Network">
+      <UniqueIdentifier>{e80434ef-ae2f-497e-808b-69913c88ad2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Public\Cores">
-      <UniqueIdentifier>{919b316e-888c-4a6d-b97f-3a86ccd5f898}</UniqueIdentifier>
+    <Filter Include="Public\Network">
+      <UniqueIdentifier>{8e9706e4-1c5b-422e-a244-8ddbcf7cef77}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
