@@ -28,3 +28,21 @@ Advanced networking stack for thousands of simultaneous connections to the same 
 
 ## ClayEngine
 An advanced Voxel LOD terrain system for rendering game worlds of limitless scale.
+
+# How To Build
+Clone the repo to your local system. Inside the repo, clone the DirectXTK repo from https://github.com/microsoft/DirectXTK.git (June 2024)
+
+Folders should look like this:
+```
++ ClayEngine
++--+ Artifacts
+|  +--- Debug
+|  +--- Release
++--+ ClayEngineClient
+|  +--- content
++--- ClayEngineLibrary
++--- ClayEngineHeadless
++--- DirectXTK
+```
+
+Open the Visual Studio solution file with Visual Studio 2022 and build the ClayEngineClient project. This should cause the DirectX toolkit to compile shaders on first build.
