@@ -65,11 +65,12 @@
 #include <DirectXCollision.h>
 //#include <DirectXHelpers.h>
 
+#define _USE_MATH_DEFINES
 #include <cmath>
 //#include <cstdio>
 #include <cstdint>
 #include <cstddef>
-//#include <cfloat>
+#include <cfloat>
 
 #include <memory>
 #include <exception>

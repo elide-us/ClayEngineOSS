@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Storage.h"
 
-ClayEngine::Platform::TextFile::TextFile(ClayEngine::String filename) noexcept(false)
+ClayEngine::TextFile::TextFile(ClayEngine::String filename) noexcept(false)
     : m_filename{ filename }
 {
     // Open file stream for reading
@@ -17,7 +17,7 @@ ClayEngine::Platform::TextFile::TextFile(ClayEngine::String filename) noexcept(f
     ifs.close();
 }
 
-ClayEngine::Platform::TextFile::~TextFile()
+ClayEngine::TextFile::~TextFile()
 {
     // Open file stream for writing (and truncate target file)
     std::ofstream ofs;
@@ -28,12 +28,12 @@ ClayEngine::Platform::TextFile::~TextFile()
     ofs.close();
 }
 
-ClayEngine::Strings const& ClayEngine::Platform::TextFile::GetLines() const
+ClayEngine::Strings const& ClayEngine::TextFile::GetLines() const
 {
     return m_lines;
 }
 
-ClayEngine::Platform::JsonFile::JsonFile(ClayEngine::String filename) noexcept(false)
+ClayEngine::JsonFile::JsonFile(ClayEngine::String filename) noexcept(false)
     :m_filename{ filename }
 {
     std::ifstream ifs{ m_filename };
@@ -41,13 +41,13 @@ ClayEngine::Platform::JsonFile::JsonFile(ClayEngine::String filename) noexcept(f
     ifs.close();
 }
 
-ClayEngine::Platform::JsonFile::~JsonFile()
+ClayEngine::JsonFile::~JsonFile()
 {
     std::ofstream ofs{ m_filename };
     ofs << std::setw(2) << m_document << std::endl;
 }
 
-ClayEngine::Platform::Document const& ClayEngine::Platform::JsonFile::GetDocument() const
+ClayEngine::Document const& ClayEngine::JsonFile::GetDocument() const
 {
     return m_document;
 }

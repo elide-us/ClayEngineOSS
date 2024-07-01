@@ -1,152 +1,176 @@
 #pragma once
+/******************************************************************************/
+/*                                                                            */
+/* ClayEngineOSS (C) 2024 Elideus                                             */
+/* WindowSystem header provides a Windows GUI window that provides messages   */
+/* from the OS and callback hooks to which other engine objects may subscribe */
+/* https://github.com/elide-us                                                */
+/*                                                                            */
+/******************************************************************************/
 
-#include "Platform.h"
+#include <Windows.h>
+#include "Strings.h"
 
 namespace ClayEngine
 {
-	namespace Platform
+	using Function = std::function<void()>;
+	using Functions = std::vector<Function>;
+
+	constexpr auto c_default_window_width = 1920U;
+	constexpr auto c_default_window_height = 1080U;
+
+	/// <summary>
+	/// This is the primary class for a window, and handles all of the message callbacks
+	/// </summary>
+	class WindowSystem
 	{
-		class ClayEngineDebugConsole
-		{
-		public:
-			ClayEngineDebugConsole()
-			{
-				if (AllocConsole())
-				{
-					FILE* file = nullptr;
-					_wfreopen_s(&file, L"CONIN$", L"r", stdin);
-					_wfreopen_s(&file, L"CONOUT$", L"w", stdout);
-					_wfreopen_s(&file, L"CONOUT$", L"w", stderr);
-					std::wcout << L"PlatformStart INFO: Allocated default console" << std::endl;
-				}
-				else throw;
+		HINSTANCE m_instance_handle = NULL;
+		int m_show_flags = SW_SHOWDEFAULT;
 
-			}
-			~ClayEngineDebugConsole()
-			{
-				FreeConsole();
-			}
-
-			// This is just a stub for now, this will eventually send its input to the message system
-			void Run()
-			{
-				auto run = true;
-				while (run)
-				{
-					Unicode input;
-					std::wcin >> input;
-
-					if (input == L"quit")
-					{
-						run = false;
-						std::cout << "Beginning system shutdown, press ENTER to exit..." << std::endl;
-					}
-				}
-			}
-		};
-		using ClayEngineDebugConsolePtr = std::unique_ptr<ClayEngineDebugConsole>;
-
-        // Forward Declarations
-        LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-
-		/// <summary>
-		/// This is the primary class for a window, and handles all of the message callbacks
-		/// </summary>
-		class WindowSystem
-		{
-			HINSTANCE m_instance_handle = NULL;
-			int m_show_flags = 0;
-
-			HWND m_window_handle = NULL;
-			Unicode m_window_name = L"";
-			Unicode m_class_name = L"";
+		HWND m_window_handle = NULL;
+		RECT m_window_size = { 0, 0, c_default_window_width, c_default_window_height };
+		Unicode m_class_name = L"defaultWindowClassName";
+		Unicode m_window_name = L"ClayEngine Default Window Title";
 			
-			bool m_in_sizemove = false;
-			bool m_in_suspend = false;
-			bool m_minimized = false;
-			bool m_fullscreen = false;
+		bool m_in_sizemove = false;
+		bool m_in_suspend = false;
+		bool m_minimized = false;
+		bool m_fullscreen = false;
 
-			RECT m_window_size = { 0, 0, c_default_window_width, c_default_window_height };
+		Functions s_onchanged = {};
+		Functions s_onactivated = {};
+		Functions s_ondeactivated = {};
+		Functions s_onsuspended = {};
+		Functions s_onresumed = {};
+		Functions s_onchar = {};
 
-		public:
-			WindowSystem(HINSTANCE hInstance, int nCmdShow = SW_SHOWDEFAULT, Unicode className = L"default", Unicode windowName = L"Default");
-			~WindowSystem();
+	public:
+		WindowSystem(HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
+		~WindowSystem();
 
-			HWND GetWindowHandle()
-			{
-				if (m_window_handle)
-					return m_window_handle;
-			}
-			LONG GetWindowWidth()
-			{
-				return m_window_size.right - m_window_size.left;
-			}
-			LONG GetWindowHeight()
-			{
-				return m_window_size.bottom - m_window_size.top;
-			}
+		#pragma region Window class accessors
+		const HWND GetWindowHandle() const
+		{
+			if (m_window_handle)
+				return m_window_handle;
+		}
+		const LONG GetWindowWidth() const
+		{
+			return m_window_size.right - m_window_size.left;
+		}
+		const LONG GetWindowHeight() const
+		{
+			return m_window_size.bottom - m_window_size.top;
+		}
+		const RECT& GetWindowSize() const
+		{
+			return m_window_size;
+		}
+		void SetWindowSize()
+		{
+			SetWindowPos(m_window_handle, HWND_TOP, m_window_size.left, m_window_size.top, m_window_size.right, m_window_size.bottom, SWP_SHOWWINDOW);			//SetWindowSize(size);
+		}
+		const Unicode& GetWindowName() const
+		{
+			return m_window_name;
+		}
+		void SetWindowName(Unicode windowName)
+		{
+			m_window_name = windowName;
+			SetWindowTextW(m_window_handle, m_window_name.c_str());
+		}
+		#pragma endregion
 
-			bool GetInSizeMove()
-			{
-				return m_in_sizemove;
-			}
-			bool GetInSuspend()
-			{
-				return m_in_suspend;
-			}
-			bool GetMinimized()
-			{
-				return m_minimized;
-			}
-			bool GetFullscreen()
-			{
-				return m_fullscreen;
-			}
+		#pragma region State management accessors
+		bool GetInSizeMove()
+		{
+			return m_in_sizemove;
+		}
+		void SetInSizeMove(bool inSizeMove)
+		{
+			m_in_sizemove = inSizeMove;
+		}
+		bool GetInSuspend()
+		{
+			return m_in_suspend;
+		}
+		void SetInSuspend(bool inSuspend)
+		{
+			m_in_suspend = inSuspend;
+		}
+		bool GetMinimized()
+		{
+			return m_minimized;
+		}
+		void SetMinimized(bool minimized)
+		{
+			m_minimized = minimized;
+		}
+		bool GetFullscreen()
+		{
+			return m_fullscreen;
+		}
+		void SetFullscreen(bool fullscreen)
+		{
+			m_fullscreen = fullscreen;
+		}
+		#pragma endregion
 
-			void SetInSizeMove(bool inSizeMove)
-			{
-				m_in_sizemove = inSizeMove;
-			}
-			void SetInSuspend(bool inSuspend)
-			{
-				m_in_suspend = inSuspend;
-			}
-			void SetMinimized(bool minimized)
-			{
-				m_minimized = minimized;
-			}
-			void SetFullscreen(bool fullscreen)
-			{
-				m_fullscreen = fullscreen;
-			}
+		#pragma region Window event callback handlers
+		void AddOnActivatedCallback(Function fn)
+		{
+			s_onactivated.push_back(fn);
+		}
+		void OnActivated()
+		{
+			for (auto& element : s_onactivated) { element(); }
+		}
+		void AddOnResumingCallback(Function fn)
+		{
+			s_onresumed.push_back(fn);
+		}
+		void OnResuming()
+		{
+			for (auto& element : s_onresumed) { element(); }
+		}
+		void AddOnSuspendedCallback(Function fn)
+		{
+			s_onsuspended.push_back(fn);
+		}
+		void OnSuspending()
+		{
+			for (auto& element : s_onsuspended) { element(); }
+		}
+		void AddOnDeactivatedCallback(Function fn)
+		{
+			s_ondeactivated.push_back(fn);
+		}
+		void OnDeactivated()
+		{
+			for (auto& element : s_ondeactivated) { element(); }
+		}
+		void AddOnChangedCallback(Function fn)
+		{
+			s_onchanged.push_back(fn);
+		}
+		void OnChanged()
+		{
+			GetClientRect(m_window_handle, &m_window_size);
 
-			// Callbacks like the old game object in the template
-			void OnActivated()
-			{
-				std::cout << "OnActivated" << std::endl;
-			}
+			for (auto& element : s_onchanged) { element(); }
+		}
 
-			void UpdateWindowSize()
-			{
-				std::cout << "UpdateWindowSize" << std::endl;
-			}
+		void AddOnCharCallback(Function fn)
+		{
+			s_onchar.push_back(fn);
+		}
+		void OnChar(WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : s_onchar) { element(); }
+		}
+		#pragma endregion
+	};
+	using WindowSystemPtr = std::unique_ptr<WindowSystem>;
+	using WindowSystemRaw = WindowSystem*;
 
-			void OnSuspending()
-			{
-				std::cout << "OnSuspending" << std::endl;
-			}
-
-			void OnResuming()
-			{
-				std::cout << "OnResuming" << std::endl;
-			}
-
-			void OnDeactivated()
-			{
-				std::cout << "OnDeactivated" << std::endl;
-			}
-		};
-		using WindowSystemPtr = std::unique_ptr<WindowSystem>;
-		using WindowSystemRaw = WindowSystem*;
-	}
 }

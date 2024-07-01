@@ -23,6 +23,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -53,6 +54,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -81,49 +83,22 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ClayEngine.h" />
-    <ClInclude Include="ClayMath.h" />
     <ClInclude Include="ClientCore.h" />
-    <ClInclude Include="ContentSystem.h" />
-    <ClInclude Include="DX11PrimitivePipeline.h" />
-    <ClInclude Include="DX11Resources.h" />
-    <ClInclude Include="DX11Textures.h" />
-    <ClInclude Include="HeadlessCore.h" />
-    <ClInclude Include="InputSystem.h" />
     <ClInclude Include="json.hpp" />
-    <ClInclude Include="NetworkSystem.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Platform.h" />
-    <ClInclude Include="Random.h" />
-    <ClInclude Include="RenderSystem.h" />
-    <ClInclude Include="ServerCore.h" />
     <ClInclude Include="Services.h" />
-    <ClInclude Include="Sprite.h" />
     <ClInclude Include="Storage.h" />
     <ClInclude Include="Strings.h" />
-    <ClInclude Include="TimingSystem.h" />
-    <ClInclude Include="Voxel.h" />
     <ClInclude Include="WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClayMath.cpp" />
+    <ClCompile Include="ClayEngine.cpp" />
     <ClCompile Include="ClientCore.cpp" />
-    <ClCompile Include="ContentSystem.cpp" />
-    <ClCompile Include="DX11PrimitivePipeline.cpp" />
-    <ClCompile Include="DX11Resources.cpp" />
-    <ClCompile Include="DX11Textures.cpp" />
-    <ClCompile Include="HeadlessCore.cpp" />
-    <ClCompile Include="InputSystem.cpp" />
-    <ClCompile Include="NetworkSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="RenderSystem.cpp" />
-    <ClCompile Include="ServerCore.cpp" />
-    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Storage.cpp" />
-    <ClCompile Include="TimingSystem.cpp" />
-    <ClCompile Include="Voxel.cpp" />
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>

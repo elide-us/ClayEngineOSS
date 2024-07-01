@@ -1,8 +1,9 @@
 #pragma once
 /******************************************************************************/
 /*                                                                            */
-/* ClayEngine Static Services Class Library (C) 2022 Epoch Meridian, LLC.     */
-/*                                                                            */
+/* ClayEngineOSS (C) 2024 Elideus                                             */
+/* Services header provides static threaded service registry
+/* https://github.com/elide-us                                                */
 /*                                                                            */
 /******************************************************************************/
 
@@ -17,82 +18,68 @@
 #include <memory>
 #include <utility>
 #include <thread>
+#include <future>
 
 #include "Strings.h"
 
 namespace ClayEngine
 {
-	using Function = std::function<void()>;
-	using Functions = std::vector<Function>;
+	using Type = std::type_index;
+	using Object = void*;
+
+	using Future = std::future<void>;
+	using Promise = std::promise<void>;
+
+	using Thread = std::thread;
+	using Affinity = std::thread::id;
+
+	using ServicesMap = std::map<Type, Object>;
+	using AffinityMap = std::map<Affinity, ServicesMap>;
 
 	/// <summary>
 	/// Stores and provides raw pointers to services created by this Service, but owned by other objects
 	/// </summary>
 	class Services
 	{
-		using Type = std::type_index;
-		using Object = void*;
-		using ServicesMap = std::map<Type, Object>;
-		using Affinity = std::thread::id;
-		using ThreadMap = std::map<Affinity, ServicesMap>;
-
-		//inline static ServicesMap m_services = {};
-		inline static ThreadMap m_services = {};
+		inline static AffinityMap m_services = {};
 
 	public:
 		/// <summary>
 		/// This factory method will create a unique_ptr object and return it to the caller.
 		/// This class will retain a copy of the pointer, and others can request a raw 
-		/// poitner to the object, but the objects themselves are expected to be RAII and not
+		/// pointer to the object, but the objects themselves are expected to be RAII and not
 		/// directly owned here, this class just provides pointers. The caller is expected to
-		/// validate if the pointer is valid before using it.
+		/// remove the entry when the service is deconstructed.
 		/// </summary>
 		template<typename T, typename... Args>
 		static std::unique_ptr<T> MakeService(Affinity threadId, Args&&... args)
 		{
 			std::wstringstream wss;
 
-			auto i = m_services.find(threadId);
-			if (i == m_services.end())
-			{
-				// Make a new ServiceMap for this thread affinity
-				ServicesMap m = {};
-				m_services.emplace(threadId, m);
-				auto s = &m_services.begin()->second;
+			auto [i, success] = m_services.try_emplace(threadId, ServicesMap());
+			auto s = i->second;
 
+			auto it = s.find(Type(typeid(T)));
+			if (it == s.end())
+			{
 				auto p = std::make_unique<T>(std::forward<Args>(args)...);
 				auto o = reinterpret_cast<Object>(p.get());
 				auto t = Type(typeid(T));
 
-				s->emplace(t, o);
+
+                wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
+				WriteLine(wss.str());
+
+				s.emplace(t, o);
 				return std::move(p);
 			}
 			else
 			{
-				// We have an existing ServiceMap for this Owner, make as normal
-				auto s = &i->second;
+				// Unique Service constraint violation
+				wss << __func__ << L"() ERROR: Service not created due to unique key constraint violation.";
+				WriteLine(wss.str());
 
-				auto it = s->find(Type(typeid(T)));
-				if (it == s->end())
-				{
-					auto p = std::make_unique<T>(std::forward<Args>(args)...);
-					auto o = reinterpret_cast<Object>(p.get());
-					auto t = Type(typeid(T));
-
-					wss << __func__ << L"() SUCCESS: " << t.name() << L" 0x" << std::setw(12) << std::hex << o;
-					WriteLine(wss.str());
-
-					s->emplace(t, o);
-					return std::move(p);
-				}
-				else
-				{
-					// Unique Service constraint violation
-					wss << __func__ << L"() ERROR: Service not created due to unique key constraint violation.";
-					WriteLine(wss.str());
-
-					return nullptr;
-				}
+				return nullptr;
 			}
 		}
 
@@ -158,6 +145,7 @@ namespace ClayEngine
 					WriteLine(wss.str());
 
 					_services->erase(it);
+					// TODO: Check if AffinityMap size == 0 and erase that if necessary.
 					return;
 				}
 				else
@@ -171,7 +159,27 @@ namespace ClayEngine
 				wss << __func__ << L"() ERROR: ServiceMap not found for thread.";
 				WriteLine(wss.str());
 			}
-
 		}
 	};
+
+	///<summary>
+	/// This extension provides the members for a threaded class, but you 
+	/// still need to provide the functor and create the thread object
+	///</summary>
+	class ThreadExtension
+	{
+	protected:
+		Promise m_promise = {};
+		Thread m_thread;
+	public:
+		~ThreadExtension()
+		{
+			if (m_thread.joinable())
+			{
+				m_promise.set_value();
+				m_thread.join();
+			}
+		}
+	};
+
 }

@@ -1,12 +1,13 @@
 {
-  "network": {
-    "server_addr": "73.210.118.242",
-    "server_port": 48000
-  },
-  "startup": "clayengine_client.json",
-  "title": "ClayEngine Default Title - Milestone 0.0.2",
-  "video": {
-    "height": 1080,
-    "width": 1920
-  }
+  "startup": [
+    {
+      "config": "clayengine_headless.json",
+      "type": "headless"
+    },
+    {
+      "class": "client01",
+      "config": "clayengine_client.json",
+      "type": "client"
+    }
+  ]
 }

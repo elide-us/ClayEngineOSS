@@ -17,7 +17,7 @@ namespace ClayEngine
 		class PrimitivePipeline
 		{
 			using PrimitiveBatchVPC = DirectX::PrimitiveBatch<DirectX::VertexPositionColor>;
-			using PrimitiveBatchVPCPtr = std::unique_ptr<PrimitiveBatchVPC>;
+			using PrimitiveBatchVPCPtr = ::std::unique_ptr<PrimitiveBatchVPC>;
 
 			PrimitiveBatchVPCPtr m_batch = nullptr;
 
@@ -26,15 +26,15 @@ namespace ClayEngine
 			~PrimitivePipeline();
 
 			// Pass a reference to a vertex buffer object that you want this pipeline to draw
-			void Draw(const std::vector<DirectX::SimpleMath::Vector3>& vbo);
+			void Draw(const ::std::vector<DirectX::SimpleMath::Vector3>& vbo);
 		};
-		using PrimitivePipelinePtr = std::unique_ptr<PrimitivePipeline>;
+		using PrimitivePipelinePtr = ::std::unique_ptr<PrimitivePipeline>;
 		using PrimitivePipelineRaw = PrimitivePipeline*;
 
 		// This class is ripe for accessor extensions for World, View, and Projection matrices
 		class Camera
 		{
-			using MatrixPtr = std::unique_ptr<DirectX::SimpleMath::Matrix>;
+			using MatrixPtr = ::std::unique_ptr<DirectX::SimpleMath::Matrix>;
 
 			MatrixPtr m_world = nullptr;
 			DirectX::SimpleMath::Matrix m_world_origin = DirectX::SimpleMath::Matrix::Identity;
@@ -42,7 +42,7 @@ namespace ClayEngine
 			MatrixPtr m_view = nullptr;
 
 			MatrixPtr m_projection = nullptr;
-			float m_proj_fov = DirectX::XM_PI / 4.f;
+			float m_proj_fov = ::DirectX::XM_PI / 4.f;
 			float m_proj_nearclip = 0.1f;
 			float m_proj_farclip = 10.f;
 
@@ -57,13 +57,13 @@ namespace ClayEngine
 			DirectX::SimpleMath::Matrix& GetView() const { return *m_view; };
 			DirectX::SimpleMath::Matrix& GetProjection() const { return *m_projection; };
 		};
-		using CameraPtr = std::unique_ptr<Camera>;
+		using CameraPtr = ::std::unique_ptr<Camera>;
 		using CameraRaw = Camera*;
 
 		class CameraEffects
 		{
-			std::unique_ptr<DirectX::BasicEffect> m_effect;
-			std::unique_ptr<DirectX::CommonStates> m_states;
+			::std::unique_ptr<DirectX::BasicEffect> m_effect;
+			::std::unique_ptr<DirectX::CommonStates> m_states;
 
 			Microsoft::WRL::ComPtr<ID3D11InputLayout> m_inputLayout;
 			Microsoft::WRL::ComPtr<ID3D11RasterizerState> m_rasterizer;
@@ -82,7 +82,7 @@ namespace ClayEngine
 			void SetWorld(const DirectX::SimpleMath::Matrix& world);
 			void SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context);
 		};
-		using CameraEffectsPtr = std::unique_ptr<CameraEffects>;
+		using CameraEffectsPtr = ::std::unique_ptr<CameraEffects>;
 		using CameraEffectsRaw = CameraEffects*;
 	}
 }
