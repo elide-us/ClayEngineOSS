@@ -56,30 +56,47 @@ namespace ClayEngine
 		{
 			std::wstringstream wss;
 
-			auto [i, success] = m_services.try_emplace(threadId, ServicesMap());
-			auto s = i->second;
-
-			auto it = s.find(Type(typeid(T)));
-			if (it == s.end())
+			auto i = m_services.find(threadId);
+			if (i == m_services.end())
 			{
-				auto p = std::make_unique<T>(std::forward<Args>(args)...);
+				ServicesMap sm = {};
+
+				auto p = std::make_unique<T>(threadId, std::forward<Args>(args)...);
 				auto o = reinterpret_cast<Object>(p.get());
 				auto t = Type(typeid(T));
 
-
-                wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
+				wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
 				WriteLine(wss.str());
 
-				s.emplace(t, o);
+				sm.emplace(t, o);
+				m_services.emplace(threadId, sm);
 				return std::move(p);
 			}
 			else
 			{
-				// Unique Service constraint violation
-				wss << __func__ << L"() ERROR: Service not created due to unique key constraint violation.";
-				WriteLine(wss.str());
+				auto s = i->second;
 
-				return nullptr;
+				auto it = s.find(Type(typeid(T)));
+				if (it == s.end())
+				{
+					auto p = std::make_unique<T>(threadId, std::forward<Args>(args)...);
+					auto o = reinterpret_cast<Object>(p.get());
+					auto t = Type(typeid(T));
+
+					wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
+					WriteLine(wss.str());
+
+					s.emplace(t, o);
+					return std::move(p);
+				}
+				else
+				{
+					// Unique Service constraint violation
+					wss << __func__ << L"() ERROR: Service not created due to unique key constraint violation.";
+					WriteLine(wss.str());
+
+					return nullptr;
+				}
 			}
 		}
 
@@ -145,7 +162,7 @@ namespace ClayEngine
 					WriteLine(wss.str());
 
 					_services->erase(it);
-					// TODO: Check if AffinityMap size == 0 and erase that if necessary.
+					//TODO: Check if AffinityMap size == 0 and erase that if necessary.
 					return;
 				}
 				else

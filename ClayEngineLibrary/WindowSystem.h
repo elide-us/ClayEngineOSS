@@ -10,6 +10,7 @@
 
 #include <Windows.h>
 #include "Strings.h"
+#include "Services.h"
 
 namespace ClayEngine
 {
@@ -24,6 +25,8 @@ namespace ClayEngine
 	/// </summary>
 	class WindowSystem
 	{
+		Affinity m_affinity;
+
 		HINSTANCE m_instance_handle = NULL;
 		int m_show_flags = SW_SHOWDEFAULT;
 
@@ -45,7 +48,7 @@ namespace ClayEngine
 		Functions s_onchar = {};
 
 	public:
-		WindowSystem(HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
+		WindowSystem(Affinity affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
 		~WindowSystem();
 
 		#pragma region Window class accessors
@@ -53,6 +56,7 @@ namespace ClayEngine
 		{
 			if (m_window_handle)
 				return m_window_handle;
+			else return NULL;
 		}
 		const LONG GetWindowWidth() const
 		{

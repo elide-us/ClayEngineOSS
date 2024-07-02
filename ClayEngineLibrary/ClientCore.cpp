@@ -2,7 +2,7 @@
 #include "ClientCore.h"
 
 #include "WindowSystem.h"
-//#include "InputSystem.h"
+#include "InputSystem.h"
 //#include "TimingSystem.h"
 //#include "ContentSystem.h"
 //#include "RenderSystem.h"
@@ -57,7 +57,8 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     //TODO: See older code for client state management logic which should go here
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
-    //auto _input = Services::MakeService<InputSystem>(_affinity);
+
+    auto _input = Services::MakeService<InputSystem>(_affinity);
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);
     //auto _content = Services::MakeService<ContentSystem>(_affinity);
     //auto _render = Services::MakeService<RenderSystem>(_affinity);

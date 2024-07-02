@@ -75,11 +75,7 @@ namespace ClayEngine
 	//constexpr auto c_default_server_port = 48000;
 	//constexpr auto c_default_server_addr = "127.0.0.1";
 
-	//constexpr auto c_max_stringbuffer_length = 1024LL;
-	//constexpr auto c_max_scrollback_length = 20LL;
-	//constexpr auto c_max_displaybuffer_length = 256LL;
-	//constexpr auto c_max_stringarray_length = 2048LL;
-
+	
 	//using UpdateCallback = std::function<void(float)>;
 	//using UpdateCallbacks = std::vector<UpdateCallback>;
 
