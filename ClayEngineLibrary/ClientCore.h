@@ -29,7 +29,10 @@ namespace ClayEngine
         ~ClayEngineClient();
 
         void SetAffinity(Affinity affinity);
+        const Affinity& GetAffinity() const;
     };
     using ClayEngineClientPtr = std::unique_ptr<ClayEngineClient>;
     using ClayEngineClientRaw = ClayEngineClient*;
+
+    using ClientMap = std::map<String, ClayEngineClientPtr>;
 }

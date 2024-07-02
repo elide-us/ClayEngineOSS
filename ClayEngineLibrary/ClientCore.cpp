@@ -38,6 +38,11 @@ void ClayEngine::ClayEngineClient::SetAffinity(Affinity affinity)
 {
 	m_affinity = affinity;
 }
+
+const ClayEngine::Affinity& ClayEngine::ClayEngineClient::GetAffinity() const
+{
+    return m_affinity;
+}
 #pragma endregion
 
 #pragma region ClayEngineClientEntryPoint Definition
@@ -47,14 +52,15 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     context->SetAffinity(_affinity);
 
     // The following services need to be instantiated for a basic client:
-    // WindowSystem, InputSystem, TimingSystem, ContentSystem, RenderSystem and NetworkSystem
+    // WindowSystem, InputSystem, TimingSystem, ContentSystem, RenderSystem
+
+    //TODO: See older code for client state management logic which should go here
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
     //auto _input = Services::MakeService<InputSystem>(_affinity);
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);
     //auto _content = Services::MakeService<ContentSystem>(_affinity);
     //auto _render = Services::MakeService<RenderSystem>(_affinity);
-    //auto _network = Services::MakeService<NetworkSystem>(_affinity);
 
     while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
     {

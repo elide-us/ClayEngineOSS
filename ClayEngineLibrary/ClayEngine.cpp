@@ -4,9 +4,6 @@
 #include <DirectXMath.h>
 #include <exception>
 
-//#include "ServerCore.h"
-//#include "HeadlessCore.h"
-
 namespace
 {
 	//INFO: This is the hidden flag to enable the debug console
@@ -46,14 +43,6 @@ ClayEngine::ClayEngine::~ClayEngine()
 
 void ClayEngine::ClayEngine::Run()
 {
-	//TODO: I need a map for each object key = class name, value = ClayEngineClient, ClayEngineServer, ClayEngineHeadless, etc.
-
-	// Inside the above file, define the startup key to script the startup process for your game
-	//auto _startup = std::make_unique<JsonFile>(m_bootstrap->GetValue<std::string>("startup"));
-
-	//std::for_each( _startup.begin(), _startup.end(), [&]() { /* */ } );
-	// "type" == "client", "server", "headless"
-
 	auto doc = m_bootstrap->GetDocument();
 	auto& startup = doc["startup"];
 	for (auto& element : startup)
@@ -66,6 +55,16 @@ void ClayEngine::ClayEngine::Run()
 			auto _class = element["class"].get<std::string>();
 			
 			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_cmdShow, m_cmdLine, ToUnicode(_class), ToUnicode(_title)));
+		}
+
+		if (_type == "server")
+		{
+			WriteLine("Implement ClayEngine GUI Server here");
+		}
+
+		if (_type == "headless")
+		{
+			WriteLine("Implement ClayEngine Service Server here");
 		}
 	}
 

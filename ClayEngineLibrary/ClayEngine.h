@@ -9,29 +9,39 @@
 
 #include <Windows.h>
 #include <memory>
-#include <map>
 
 #include "Strings.h" // String and error handling
 #include "Storage.h" // Filesystem and JSON parsing
 
-#include "ClientCore.h"0
+#include "ClientCore.h"
+//#include "ServerCore.h"
+//#include "HeadlessCore.h"
 
 namespace ClayEngine
 {
-	constexpr auto c_bootstrap_json = "clayengine.json";
-
 	/// <summary>
 	/// ClayEngine is a boot loader class that will read the
 	/// configuration defined in clayengine.json.
 	/// </summary>
 	class ClayEngine
 	{
-		HINSTANCE m_hInstance;
-		LPWSTR m_cmdLine;
-		UINT m_cmdShow;
+		HINSTANCE m_hInstance; // This is the HANDLE to the process
+		LPWSTR m_cmdLine; // The command line from the OS
+		UINT m_cmdShow; // The window display flags, eg. SW_SHOWDEFAULT
 
-		JsonFilePtr m_bootstrap = {};
-		std::map<std::string, std::unique_ptr<ClayEngineClient>> m_clients = {};
+		JsonFilePtr m_bootstrap = {}; // Loads clayengine.json
+
+		// These maps contain the kernels for each client and server running within this process
+		// There should typically only be one Server running to minimize resource usage since 
+		// this process runs a GUI. The headless server should be used for most other processes
+		// such as authentication, egress routing, database connectors, and the like. It should be
+		// possible to run all of these services on one headless node, and connect to it with the
+		// GUI server to view and monitor the game world status. It is strongly recommended to
+		// run the game world server on its own dedicated node.
+
+		ClientMap m_clients = {};
+		//ServerMap m_servers = {};
+		//HeadlessMap m_headless = {};
 
 	public:
 		ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale);
@@ -54,23 +64,16 @@ namespace ClayEngine
 
 	// In an effort to standardize terminology, the following prefixes should be 
 	// used for most functions, when possible:
-	// Create, Read, Update, Delete
+	// Create, Read, Update, Delete (CRUD)
 	// Make/Destroy
 	// Add/Remove
 	// Set/Get
-
+	
 	//constexpr auto c_pi = 3.1415926535F;
 	//constexpr auto c_2pi = 6.283185307F;
 
-	//constexpr auto c_default_window_title = "ClayEngine";
-	//constexpr auto c_default_window_class = "ClayEngineWindowClass";
 	//constexpr auto c_default_server_port = 48000;
 	//constexpr auto c_default_server_addr = "127.0.0.1";
-
-	//constexpr auto c_settings_debug_json = "clayengine_debug.json"; // Debug scenario with console, server and multiple clients
-	//constexpr auto c_settings_client_json = "clayengine_client.json"; // Graphical client
-	//constexpr auto c_settings_server_json = "clayengine_server.json"; // Graphical server
-	//constexpr auto c_settings_headless_json = "clayengine_headless.json"; // Console server
 
 	//constexpr auto c_max_stringbuffer_length = 1024LL;
 	//constexpr auto c_max_scrollback_length = 20LL;
@@ -82,11 +85,6 @@ namespace ClayEngine
 
 	//using DrawCallback = std::function<void()>;
 	//using DrawCallbacks = std::vector<DrawCallback>;
-
-	//struct ILayoutChanged
-	//{
-	//	virtual void OnLayoutChanged(float x, float y, float width, float height) = 0;
-	//};
 
 	//struct IUpdate
 	//{

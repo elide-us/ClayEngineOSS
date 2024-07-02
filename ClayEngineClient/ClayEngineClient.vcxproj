@@ -29,6 +29,56 @@
       <FileType>Document</FileType>
     </CopyFileToFolders>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="content.json" />
+    <None Include="content\fonts\Consolas_10.spritefont">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+    <None Include="content\fonts\Consolas_16.spritefont" />
+    <None Include="content\fonts\Consolas_24.spritefont" />
+    <None Include="content\fonts\Mason_24.spritefont" />
+    <None Include="content\models\BirchTree_1.sdkmesh" />
+    <None Include="content\models\BirchTree_2.sdkmesh" />
+    <None Include="content\models\BirchTree_3.sdkmesh" />
+    <None Include="content\models\BirchTree_4.sdkmesh" />
+    <None Include="content\models\BirchTree_5.sdkmesh" />
+    <None Include="content\models\BirchTree_Autumn_1.sdkmesh" />
+    <None Include="content\models\BirchTree_Autumn_2.sdkmesh" />
+    <None Include="content\models\BirchTree_Autumn_3.sdkmesh" />
+    <None Include="content\models\BirchTree_Autumn_4.sdkmesh" />
+    <None Include="content\models\BirchTree_Autumn_5.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_1.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_2.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_3.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_4.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_5.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_Snow_1.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_Snow_2.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_Snow_3.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_Snow_4.sdkmesh" />
+    <None Include="content\models\BirchTree_Dead_Snow_5.sdkmesh" />
+    <None Include="content\models\BirchTree_Snow_1.sdkmesh" />
+    <None Include="content\models\BirchTree_Snow_2.sdkmesh" />
+    <None Include="content\models\BirchTree_Snow_3.sdkmesh" />
+    <None Include="content\models\BirchTree_Snow_4.sdkmesh" />
+    <None Include="content\models\BirchTree_Snow_5.sdkmesh" />
+    <None Include="content\models\BlackSpade.sdkmesh" />
+    <None Include="content\models\BlueGem.sdkmesh" />
+    <None Include="content\models\Gem02-MO.sdkmesh" />
+    <None Include="content\models\Gem03-MO.sdkmesh" />
+    <None Include="content\models\Gem05-MO.sdkmesh" />
+    <None Include="content\models\Gem06-MO.sdkmesh" />
+    <None Include="content\models\Gem07-MO.sdkmesh" />
+    <None Include="content\models\Gem08-MO.sdkmesh" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="content\sprites\BlueSkyFrame.dds" />
+    <Image Include="content\sprites\Controls.dds" />
+    <Image Include="content\sprites\Cursor.dds" />
+    <Image Include="content\sprites\GoldBox.dds" />
+    <Image Include="content\sprites\Pixel.dds" />
+    <Image Include="content\sprites\UIElements.dds" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -75,6 +125,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>robocopy ../ClayEngineClient/content ../Artifacts/content /E /NFL /NJH</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
