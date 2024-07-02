@@ -1,12 +1,13 @@
 {
   "startup": [
     {
-      "config": "clayengine_headless.json",
-      "type": "headless"
+      "class": "client01",
+      "title": "ClayEngine Test Client 01",
+      "type": "client"
     },
     {
-      "class": "client01",
-      "config": "clayengine_client.json",
+      "class": "client02",
+      "title": "ClayEngine Test Client 02",
       "type": "client"
     }
   ]

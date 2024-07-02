@@ -4,7 +4,6 @@
 #include <DirectXMath.h>
 #include <exception>
 
-#include "ClientCore.h"
 //#include "ServerCore.h"
 //#include "HeadlessCore.h"
 
@@ -47,15 +46,28 @@ ClayEngine::ClayEngine::~ClayEngine()
 
 void ClayEngine::ClayEngine::Run()
 {
-	//TODO: Much work to do here...
+	//TODO: I need a map for each object key = class name, value = ClayEngineClient, ClayEngineServer, ClayEngineHeadless, etc.
 
 	// Inside the above file, define the startup key to script the startup process for your game
-	//m_startup = std::make_unique<JsonFile>(m_bootstrap->GetValue<std::string>("startup"));
+	//auto _startup = std::make_unique<JsonFile>(m_bootstrap->GetValue<std::string>("startup"));
 
-	//std::for_each( m_startup.begin(), m_startup.end(), [&]() { /* */ } );
+	//std::for_each( _startup.begin(), _startup.end(), [&]() { /* */ } );
 	// "type" == "client", "server", "headless"
 
-	auto _cec = std::make_unique<ClayEngineClient>(m_hInstance, m_cmdShow, m_cmdLine, L"client01", L"ClayEngine Test Client");
+	auto doc = m_bootstrap->GetDocument();
+	auto& startup = doc["startup"];
+	for (auto& element : startup)
+	{
+		auto _type = element["type"].get<std::string>();
+
+		if (_type == "client")
+		{
+			auto _title = element["title"].get<std::string>();
+			auto _class = element["class"].get<std::string>();
+			
+			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_cmdShow, m_cmdLine, ToUnicode(_class), ToUnicode(_title)));
+		}
+	}
 
 	// Start the std::cin parser for flow control
 	bool _run = true;
@@ -71,7 +83,10 @@ void ClayEngine::ClayEngine::Run()
 		}
 	}
 
-	_cec.reset();
+	for (auto& element : m_clients)
+	{
+		element.second.reset();
+	}
 }
 
 #pragma region Orphaned Code Fragments
