@@ -9,9 +9,12 @@
 
 #include <Windows.h>
 #include <memory>
+#include <map>
 
 #include "Strings.h" // String and error handling
 #include "Storage.h" // Filesystem and JSON parsing
+
+#include "ClientCore.h"0
 
 namespace ClayEngine
 {
@@ -28,6 +31,7 @@ namespace ClayEngine
 		UINT m_cmdShow;
 
 		JsonFilePtr m_bootstrap = {};
+		std::map<std::string, std::unique_ptr<ClayEngineClient>> m_clients = {};
 
 	public:
 		ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale);

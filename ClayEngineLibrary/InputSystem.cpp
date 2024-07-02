@@ -5,7 +5,6 @@
 
 using namespace DirectX;
 using namespace ClayEngine;
-using namespace ClayEngine::Platform;
 
 InputSystem::InputSystem()
 {
