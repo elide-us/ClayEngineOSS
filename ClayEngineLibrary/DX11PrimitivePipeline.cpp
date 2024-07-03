@@ -1,21 +1,22 @@
 #include "pch.h"
 #include "DX11PrimitivePipeline.h"
 
-#include "Platform.h"
+#include "Services.h"
 
 #pragma region Basic Vertex Position Color (VPC) Primitive Pipeline
-ClayEngine::Graphics::PrimitivePipeline::PrimitivePipeline(ContextRaw context)
+ClayEngine::PrimitivePipeline::PrimitivePipeline(Affinity affinityId, ContextRaw context)
+	: m_affinity(affinityId)
 {
 	m_batch = std::make_unique<PrimitiveBatchVPC>(context);
 }
 
-ClayEngine::Graphics::PrimitivePipeline::~PrimitivePipeline()
+ClayEngine::PrimitivePipeline::~PrimitivePipeline()
 {
 	m_batch.reset();
 	m_batch = nullptr;
 }
 
-void ClayEngine::Graphics::PrimitivePipeline::Draw(const std::vector<DirectX::SimpleMath::Vector3>& vbo)
+void ClayEngine::PrimitivePipeline::Draw(const std::vector<DirectX::SimpleMath::Vector3>& vbo)
 {
 	m_batch->Begin();
 
@@ -38,7 +39,7 @@ void ClayEngine::Graphics::PrimitivePipeline::Draw(const std::vector<DirectX::Si
 #pragma endregion
 
 #pragma region View Camera
-ClayEngine::Graphics::Camera::Camera(RECT size)
+ClayEngine::Camera::Camera(RECT size)
 {
 	m_world = std::make_unique<DirectX::SimpleMath::Matrix>(m_world_origin);
 
@@ -56,7 +57,7 @@ ClayEngine::Graphics::Camera::Camera(RECT size)
 	));
 }
 
-ClayEngine::Graphics::Camera::~Camera()
+ClayEngine::Camera::~Camera()
 {
 	m_projection.reset();
 	m_projection = nullptr;
@@ -68,14 +69,14 @@ ClayEngine::Graphics::Camera::~Camera()
 	m_world = nullptr;
 }
 
-void ClayEngine::Graphics::Camera::Update(float elapsedTime)
+void ClayEngine::Camera::Update(float elapsedTime)
 {
 	//TODO: Update camera from input
 }
 #pragma endregion
 
 #pragma region Shader Pipeline
-ClayEngine::Graphics::CameraEffects::CameraEffects(Microsoft::WRL::ComPtr<ID3D11Device> device, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& projection)
+ClayEngine::CameraEffects::CameraEffects(Microsoft::WRL::ComPtr<ID3D11Device> device, const DirectX::SimpleMath::Matrix& view, const DirectX::SimpleMath::Matrix& projection)
 {
 	m_effect = std::make_unique<DirectX::BasicEffect>(device.Get());
 	m_effect->SetVertexColorEnabled(true);
@@ -84,7 +85,7 @@ ClayEngine::Graphics::CameraEffects::CameraEffects(Microsoft::WRL::ComPtr<ID3D11
 
 	m_effect->GetVertexShaderBytecode(&m_shaderCode, &m_shaderCodeLength);
 
-	ClayEngine::Platform::ThrowIfFailed(
+	ThrowIfFailed(
 		device->CreateInputLayout(
 			DirectX::VertexPositionColor::InputElements,
 			DirectX::VertexPositionColor::InputElementCount,
@@ -103,14 +104,14 @@ ClayEngine::Graphics::CameraEffects::CameraEffects(Microsoft::WRL::ComPtr<ID3D11
 		D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS, TRUE, FALSE, TRUE, FALSE
 	);
 
-	ClayEngine::Platform::ThrowIfFailed(
+	ThrowIfFailed(
 		device->CreateRasterizerState(
 			&rasterDesc, m_rasterizer.ReleaseAndGetAddressOf()
 		)
 	);
 }
 
-ClayEngine::Graphics::CameraEffects::~CameraEffects()
+ClayEngine::CameraEffects::~CameraEffects()
 {
 	m_rasterizer.Reset();
 	m_inputLayout.Reset();
@@ -118,12 +119,12 @@ ClayEngine::Graphics::CameraEffects::~CameraEffects()
 	m_effect.reset();
 }
 
-Microsoft::WRL::ComPtr<ID3D11InputLayout> ClayEngine::Graphics::CameraEffects::GetInputLayout() const
+Microsoft::WRL::ComPtr<ID3D11InputLayout> ClayEngine::CameraEffects::GetInputLayout() const
 {
 	return m_inputLayout;
 }
 
-void ClayEngine::Graphics::CameraEffects::SetState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
+void ClayEngine::CameraEffects::SetState(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
 {
 	context->OMSetBlendState(m_states->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
 	//context->OMSetBlendState(m_states->AlphaBlend(), DirectX::Colors::White, 0xFFFFFFFF);
@@ -149,12 +150,12 @@ void ClayEngine::Graphics::CameraEffects::SetState(Microsoft::WRL::ComPtr<ID3D11
 	context->PSSetSamplers(0, 1, &samplerState);
 }
 
-void ClayEngine::Graphics::CameraEffects::SetWorld(const DirectX::SimpleMath::Matrix& world)
+void ClayEngine::CameraEffects::SetWorld(const DirectX::SimpleMath::Matrix& world)
 {
 	m_effect->SetWorld(world);
 }
 
-void ClayEngine::Graphics::CameraEffects::SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
+void ClayEngine::CameraEffects::SetContext(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
 {
 	m_effect->Apply(context.Get());
 }

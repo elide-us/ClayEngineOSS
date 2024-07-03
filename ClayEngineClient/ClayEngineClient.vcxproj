@@ -126,7 +126,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <PostBuildEvent>
-      <Command>robocopy ../ClayEngineClient/content ../Artifacts/content /E /NFL /NJH</Command>
+      <Command>robocopy $(SolutionDir)ClayEngineClient/content $(SolutionDir)Artifacts/$(Configuration)/content /E /NFL /NJH</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

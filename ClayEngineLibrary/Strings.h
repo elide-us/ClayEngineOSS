@@ -23,20 +23,6 @@ namespace ClayEngine
 	using String = std::string;
 	using Strings = std::vector<String>;
 
-	inline void ThrowIfFailed(HRESULT hr, String reason)
-	{
-		if (FAILED(hr))
-		{
-			// Set a breakpoint on this line to catch DirectX API errors
-			throw std::exception(reason.c_str());
-		}
-	}
-
-	inline void ThrowIfFailed(HRESULT hr)
-	{
-		ThrowIfFailed(hr, "ClayEngine::ThrowIfFailed()");
-	}
-
 	/// <summary>
 	/// Convert an ANSI string to a Unicode string
 	/// </summary>
@@ -77,6 +63,21 @@ namespace ClayEngine
 		WriteLine(u);
 	}
 
+	inline void ThrowIfFailed(HRESULT hr, String reason)
+	{
+		if (FAILED(hr))
+		{
+			// Set a breakpoint on this line to catch DirectX API errors
+			WriteLine(reason);
+			throw std::exception(reason.c_str());
+		}
+	}
+
+	inline void ThrowIfFailed(HRESULT hr)
+	{
+		ThrowIfFailed(hr, "ClayEngine::ThrowIfFailed()");
+	}
+
 	/// <summary>
 	/// Returns a vector of Strings from a string using space as default delimiter 
 	/// </summary>
@@ -115,4 +116,14 @@ namespace ClayEngine
 		return v;
 	}
 
+}
+
+namespace
+{
+	//INFO: This is the hidden flag to enable the debug console
+#ifdef _DEBUG
+	constexpr auto g_debug = true;
+#else
+	constexpr auto g_debug = false;
+#endif
 }

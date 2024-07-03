@@ -2,12 +2,16 @@
 #include "DX11Textures.h"
 
 using namespace DirectX;
-using namespace ClayEngine::Graphics;
 
 #include "WICTextureLoader.h"
-#include "Platform.h"
 
-void TextureResources::AddTexture(String texture)
+ClayEngine::TextureResources::TextureResources(Affinity affinityId)
+	: m_affinity(affinityId)
+{
+
+}
+
+void ClayEngine::TextureResources::AddTexture(String texture)
 {
 	if (m_device.Get() == 0) WriteLine("AddTexture DEBUG: Cannot access Textures before Device is assigned.");
 	auto it = m_textures.find(texture);
@@ -18,7 +22,7 @@ void TextureResources::AddTexture(String texture)
 	path << L"content\\sprites\\" << s << L".dds";
 
 	TextureComPtr t = {};
-	ClayEngine::Platform::ThrowIfFailed(CreateWICTextureFromFile(m_device.Get(), path.str().c_str(), nullptr, t.ReleaseAndGetAddressOf()));
+	ThrowIfFailed(CreateWICTextureFromFile(m_device.Get(), path.str().c_str(), nullptr, t.ReleaseAndGetAddressOf()));
 	assert(ResourceIsD3D11Texture2D(t));
 
 	m_textures.emplace(texture, std::move(t));
@@ -28,7 +32,7 @@ void TextureResources::AddTexture(String texture)
 	WriteLine(ss.str());
 }
 
-TextureRaw TextureResources::GetTexture(String texture)
+ClayEngine::TextureRaw ClayEngine::TextureResources::GetTexture(String texture)
 {
 	auto it = m_textures.find(texture);
 	if (it != m_textures.end())
@@ -39,7 +43,7 @@ TextureRaw TextureResources::GetTexture(String texture)
 	return nullptr;
 }
 
-void TextureResources::RemoveTexture(String texture)
+void ClayEngine::TextureResources::RemoveTexture(String texture)
 {
 	auto it = m_textures.find(texture);
 	if (it != m_textures.end())
@@ -58,13 +62,19 @@ void TextureResources::RemoveTexture(String texture)
 	WriteLine("GetTexture DEBUG: Texture key not found in Textures map.");
 }
 
-void TextureResources::ClearTextures()
+void ClayEngine::TextureResources::ClearTextures()
 {
 	m_textures.clear();
 	WriteLine("ClearTextures INFO: Texture map cleared.");
 }
 
-void FontResources::AddFont(String font)
+ClayEngine::FontResources::FontResources(Affinity affinityId)
+	: m_affinity(affinityId)
+{
+
+}
+
+void ClayEngine::FontResources::AddFont(String font)
 {
 	if (m_device.Get() == 0) WriteLine("AddFont DEBUG: Cannot access Fonts before Device is assigned.");
 	auto it = m_fonts.find(font);
@@ -81,7 +91,7 @@ void FontResources::AddFont(String font)
 	WriteLine(ss.str());
 }
 
-SpriteFontRaw FontResources::GetFont(String font)
+ClayEngine::SpriteFontRaw ClayEngine::FontResources::GetFont(String font)
 {
 	auto it = m_fonts.find(font);
 	if (it != m_fonts.end())
@@ -92,7 +102,7 @@ SpriteFontRaw FontResources::GetFont(String font)
 	return nullptr;
 }
 
-void ClayEngine::Graphics::FontResources::RemoveFont(String font)
+void ClayEngine::FontResources::RemoveFont(String font)
 {
 	auto it = m_fonts.find(font);
 	if (it != m_fonts.end())
@@ -111,7 +121,7 @@ void ClayEngine::Graphics::FontResources::RemoveFont(String font)
 	WriteLine("GetFont DEBUG: Font key not found in Fonts map.");
 }
 
-void ClayEngine::Graphics::FontResources::ClearFonts()
+void ClayEngine::FontResources::ClearFonts()
 {
 	m_fonts.clear();
 	WriteLine("ClearFonts INFO: SpriteFont map cleared.");

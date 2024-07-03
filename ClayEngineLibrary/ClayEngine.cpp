@@ -4,12 +4,6 @@
 #include <DirectXMath.h>
 #include <exception>
 
-namespace
-{
-	//INFO: This is the hidden flag to enable the debug console
-	constexpr auto g_debug = true;
-}
-
 ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale)
 	: m_hInstance(hInstance), m_cmdLine(lpCmdLine), m_cmdShow(nCmdShow)
 {

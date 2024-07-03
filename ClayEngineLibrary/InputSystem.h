@@ -21,6 +21,8 @@ namespace ClayEngine
 	constexpr auto c_max_displaybuffer_length = 256LL;
 	constexpr auto c_max_stringarray_length = 2048LL;
 
+	// Create context objects for each of these that sets a Size in a normal manner...
+
 	template<size_t Size>
 	class StringBuffer
 	{

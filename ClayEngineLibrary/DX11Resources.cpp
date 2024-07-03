@@ -1,31 +1,27 @@
 #include "pch.h"
 #include "DX11Resources.h"
 
+#include "Strings.h"
 #include "WindowSystem.h"
-#include "RenderSystem.h"
 
-using namespace ClayEngine;
-using namespace ClayEngine::Graphics;
-using namespace ClayEngine::Platform;
-
-DX11Resources::DX11Resources(UINT flags)
+ClayEngine::DX11Resources::DX11Resources(Affinity affinityId, UINT flags)
+	: m_affinity(affinityId), m_creation_flags(flags)
 {
-	StartResources(flags);
+	StartResources();
 
 	StartPipeline();
 }
 
-ClayEngine::Graphics::DX11Resources::~DX11Resources()
+ClayEngine::DX11Resources::~DX11Resources()
 {
 	StopPipeline();
 
 	StopResources();
 }
 
-void DX11Resources::StartResources(UINT flags)
+//TODO:  DX11Resources needs to be reworked, this D3D11CreateDevice call is not working
+void ClayEngine::DX11Resources::StartResources()
 {
-	m_creation_flags = flags;
-
 #ifdef _DEBUG
 	m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
@@ -36,7 +32,7 @@ void DX11Resources::StartResources(UINT flags)
 	ComPtr<ID3D11Device> device;
 	ComPtr<ID3D11DeviceContext> context;
 
-	ClayEngine::Platform::ThrowIfFailed(D3D11CreateDevice(
+	ThrowIfFailed(D3D11CreateDevice(
 		nullptr, // default adapter
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
@@ -72,11 +68,11 @@ void DX11Resources::StartResources(UINT flags)
 	}
 #endif
 
-	ClayEngine::Platform::ThrowIfFailed(device.As(&m_device));
-	ClayEngine::Platform::ThrowIfFailed(context.As(&m_context));
+	ThrowIfFailed(device.As(&m_device));
+	ThrowIfFailed(context.As(&m_context));
 }
 
-void DX11Resources::StopResources()
+void ClayEngine::DX11Resources::StopResources()
 {
 	if (m_context)
 	{
@@ -91,16 +87,16 @@ void DX11Resources::StopResources()
 	}
 }
 
-void DX11Resources::RestartResources()
+void ClayEngine::DX11Resources::RestartResources()
 {
 	StopResources();
 
 	StartResources();
 }
 
-void DX11Resources::StartPipeline()
+void ClayEngine::DX11Resources::StartPipeline()
 {
-	auto hwnd = Services::GetService<WindowSystem>(std::this_thread::get_id())->GetWindowHandle();
+	auto hwnd = Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle();
 
 	// Clear the previous window size specific context.
 	ID3D11RenderTargetView* views[] = { nullptr };
@@ -127,25 +123,25 @@ void DX11Resources::StartPipeline()
 
 		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
 		{
-			Services::GetService<RenderSystem>(std::this_thread::get_id())->RestartRenderSystem();
+			//Services::GetService<RenderSystem>(std::this_thread::get_id())->RestartRenderSystem();
 			//TODO: This should be signaling WindowSystem::OnDeviceLost() or something like that...
 			return;
 		}
 		else
 		{
-			ClayEngine::Platform::ThrowIfFailed(hr);
+			ThrowIfFailed(hr);
 		}
 	}
 	else
 	{
 		ComPtr<IDXGIDevice1> dxgi_device;
-		ClayEngine::Platform::ThrowIfFailed(m_device.As(&dxgi_device));
+		ThrowIfFailed(m_device.As(&dxgi_device));
 
 		ComPtr<IDXGIAdapter> dxgi_adapter;
-		ClayEngine::Platform::ThrowIfFailed(dxgi_device->GetAdapter(dxgi_adapter.GetAddressOf()));
+		ThrowIfFailed(dxgi_device->GetAdapter(dxgi_adapter.GetAddressOf()));
 
 		ComPtr<IDXGIFactory2> dxgi_factory;
-		ClayEngine::Platform::ThrowIfFailed(dxgi_adapter->GetParent(IID_PPV_ARGS(dxgi_factory.GetAddressOf())));
+		ThrowIfFailed(dxgi_adapter->GetParent(IID_PPV_ARGS(dxgi_factory.GetAddressOf())));
 
 		// Create a descriptor for the swap chain.
 		DXGI_SWAP_CHAIN_DESC1 swapchain_desc = {};
@@ -161,27 +157,27 @@ void DX11Resources::StartPipeline()
 		swapchain_desc_fs.Windowed = TRUE;
 
 		// Create a SwapChain from a Win32 window.
-		ClayEngine::Platform::ThrowIfFailed(dxgi_factory->CreateSwapChainForHwnd(m_device.Get(), hwnd,
+		ThrowIfFailed(dxgi_factory->CreateSwapChainForHwnd(m_device.Get(), hwnd,
 			&swapchain_desc, &swapchain_desc_fs, nullptr, m_swapchain.ReleaseAndGetAddressOf()));
 
 		// This template does not support exclusive fullscreen mode and prevents DXGI from responding to the ALT+ENTER shortcut.
-		ClayEngine::Platform::ThrowIfFailed(dxgi_factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
+		ThrowIfFailed(dxgi_factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 	}
 
 	// Obtain the backbuffer for this window which will be the final 3D rendertarget.
-	ClayEngine::Platform::ThrowIfFailed(m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_buffer.GetAddressOf())));
+	ThrowIfFailed(m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_buffer.GetAddressOf())));
 
 	// Create a view interface on the rendertarget to use on bind.
-	ClayEngine::Platform::ThrowIfFailed(m_device->CreateRenderTargetView(m_rendertarget_buffer.Get(), nullptr, m_rendertarget.ReleaseAndGetAddressOf()));
+	ThrowIfFailed(m_device->CreateRenderTargetView(m_rendertarget_buffer.Get(), nullptr, m_rendertarget.ReleaseAndGetAddressOf()));
 
 	// Allocate a 2-D surface as the depth/stencil buffer and
 	// create a DepthStencil view on this surface to use on bind.
-	ClayEngine::Platform::ThrowIfFailed(m_device->CreateTexture2D(&depthstencil_desc, nullptr, m_depthstencil_buffer.GetAddressOf()));
+	ThrowIfFailed(m_device->CreateTexture2D(&depthstencil_desc, nullptr, m_depthstencil_buffer.GetAddressOf()));
 
-	ClayEngine::Platform::ThrowIfFailed(m_device->CreateDepthStencilView(m_depthstencil_buffer.Get(), &depthstencilview_desc, m_depthstencil.ReleaseAndGetAddressOf()));
+	ThrowIfFailed(m_device->CreateDepthStencilView(m_depthstencil_buffer.Get(), &depthstencilview_desc, m_depthstencil.ReleaseAndGetAddressOf()));
 }
 
-void DX11Resources::StopPipeline()
+void ClayEngine::DX11Resources::StopPipeline()
 {
 	if (m_depthstencil)
 	{
@@ -202,19 +198,19 @@ void DX11Resources::StopPipeline()
 	}
 }
 
-void DX11Resources::RestartPipeline()
+void ClayEngine::DX11Resources::RestartPipeline()
 {
 	StopPipeline();
 
 	StartPipeline();
 }
 
-void DX11Resources::OnDeviceLost()
+void ClayEngine::DX11Resources::OnDeviceLost()
 {
 
 }
 
-DeviceRaw DX11Resources::GetDevice()
+ClayEngine::DeviceRaw ClayEngine::DX11Resources::GetDevice()
 {
 	if (m_device)
 		return m_device.Get();
@@ -222,7 +218,7 @@ DeviceRaw DX11Resources::GetDevice()
 		return nullptr;
 }
 
-ContextRaw DX11Resources::GetContext()
+ClayEngine::ContextRaw ClayEngine::DX11Resources::GetContext()
 {
 	if (m_context)
 		return m_context.Get();
@@ -230,7 +226,7 @@ ContextRaw DX11Resources::GetContext()
 		return nullptr;
 }
 
-SwapChainRaw DX11Resources::GetSwapChain()
+ClayEngine::SwapChainRaw ClayEngine::DX11Resources::GetSwapChain()
 {
 	if (m_swapchain)
 		return m_swapchain.Get();
@@ -238,7 +234,7 @@ SwapChainRaw DX11Resources::GetSwapChain()
 		return nullptr;
 }
 
-RenderTargetViewRaw DX11Resources::GetRTV()
+ClayEngine::RenderTargetViewRaw ClayEngine::DX11Resources::GetRTV()
 {
 	if (m_rendertarget)
 		return m_rendertarget.Get();
@@ -246,7 +242,7 @@ RenderTargetViewRaw DX11Resources::GetRTV()
 		return nullptr;
 }
 
-DepthStencilViewRaw DX11Resources::GetDSV()
+ClayEngine::DepthStencilViewRaw ClayEngine::DX11Resources::GetDSV()
 {
 	if (m_depthstencil)
 		return m_depthstencil.Get();
@@ -254,12 +250,12 @@ DepthStencilViewRaw DX11Resources::GetDSV()
 		return nullptr;
 }
 
-RenderTargetViewPtr DX11Resources::GetRTVPtr()
+ClayEngine::RenderTargetViewPtr ClayEngine::DX11Resources::GetRTVPtr()
 {
 	return m_rendertarget;
 }
 
-DepthStencilViewPtr DX11Resources::GetDSVPtr()
+ClayEngine::DepthStencilViewPtr ClayEngine::DX11Resources::GetDSVPtr()
 {
 	return m_depthstencil;
 }

@@ -74,10 +74,10 @@ namespace ClayEngine
 			}
 			else
 			{
-				auto s = i->second;
+				auto s = &i->second;
 
-				auto it = s.find(Type(typeid(T)));
-				if (it == s.end())
+				auto it = s->find(Type(typeid(T)));
+				if (it == s->end())
 				{
 					auto p = std::make_unique<T>(threadId, std::forward<Args>(args)...);
 					auto o = reinterpret_cast<Object>(p.get());
@@ -86,7 +86,7 @@ namespace ClayEngine
 					wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
 					WriteLine(wss.str());
 
-					s.emplace(t, o);
+					s->emplace(t, o);
 					return std::move(p);
 				}
 				else
@@ -97,6 +97,46 @@ namespace ClayEngine
 
 					return nullptr;
 				}
+			}
+		}
+
+		template<typename T, typename... Args>
+		static std::unique_ptr<T> MakeDxService(Affinity threadId, Args&&... args)
+		{
+			std::wstringstream wss;
+
+			auto i = m_services.find(threadId);
+			if (i != m_services.end())
+			{
+				auto s = &i->second;
+
+				auto it = s->find(Type(typeid(T)));
+				if (it == s->end())
+				{
+					auto p = std::make_unique<T>(std::forward<Args>(args)...);
+					auto o = reinterpret_cast<Object>(p.get());
+					auto t = Type(typeid(T));
+
+					wss << __func__ << L"() SUCCESS: " << t.name() << L" " << o;
+					WriteLine(wss.str());
+
+					s->emplace(t, o);
+					return std::move(p);
+				}
+				else
+				{
+					// Unique Service constraint violation
+					wss << __func__ << L"() ERROR: Service not created due to unique key constraint violation.";
+					WriteLine(wss.str());
+
+					return nullptr;
+				}
+			}
+			else
+			{
+				wss << __func__ << L"() ERROR: Service not created due to missing service map.";
+				WriteLine(wss.str());
+				return nullptr;
 			}
 		}
 
@@ -126,7 +166,7 @@ namespace ClayEngine
 					return p;
 				}
 
-				if (!silent)
+				if (g_debug)
 				{
 					wss << __func__ << L"() ERROR: Service not found.";
 					WriteLine(wss.str());
