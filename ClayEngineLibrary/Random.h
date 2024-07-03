@@ -1,4 +1,11 @@
 #pragma once
+/******************************************************************************/
+/*                                                                            */
+/* ClayEngineOSS (C) 2024 Elideus                                             */
+/* Random number generation services                                          */
+/* https://github.com/elide-us                                                */
+/*                                                                            */
+/******************************************************************************/
 
 #include <random>
 #include <numeric>

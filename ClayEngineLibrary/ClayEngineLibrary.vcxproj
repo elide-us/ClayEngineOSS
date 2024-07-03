@@ -91,10 +91,12 @@
     <ClInclude Include="InputSystem.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Random.h" />
     <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="Services.h" />
     <ClInclude Include="Storage.h" />
     <ClInclude Include="Strings.h" />
+    <ClInclude Include="Voxel.h" />
     <ClInclude Include="WindowSystem.h" />
   </ItemGroup>
   <ItemGroup>
@@ -111,6 +113,7 @@
     </ClCompile>
     <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Storage.cpp" />
+    <ClCompile Include="Voxel.cpp" />
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
