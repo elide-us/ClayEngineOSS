@@ -3,28 +3,25 @@
 
 #include "DX11Resources.h"
 
-using namespace ClayEngine;
-using namespace ClayEngine::Graphics;
-using namespace ClayEngine::Platform;
-
-ContentSystem::ContentSystem()
+ClayEngine::ContentSystem::ContentSystem(Affinity affinityId)
+    : m_affinity(affinityId)
 {
     StartContentSystem();
 }
 
-ContentSystem::~ContentSystem()
+ClayEngine::ContentSystem::~ContentSystem()
 {
     StopContentSystem();
 }
 
-void ClayEngine::Graphics::ContentSystem::StartContentSystem()
+void ClayEngine::ContentSystem::StartContentSystem()
 {
-    auto device = Services::GetService<DX11Resources>(std::this_thread::get_id())->GetDevice();
+    auto device = Services::GetService<DX11Resources>(m_affinity)->GetDevice();
 
-    m_textures = Services::MakeService<TextureResources>(std::this_thread::get_id());
+    m_textures = Services::MakeService<TextureResources>(m_affinity);
     m_textures->SetDevice(device);
 
-    m_fonts = Services::MakeService<FontResources>(std::this_thread::get_id());
+    m_fonts = Services::MakeService<FontResources>(m_affinity);
     m_fonts->SetDevice(device);
 
     m_json = std::make_unique<JsonFile>(c_content_filename);
@@ -37,18 +34,18 @@ void ClayEngine::Graphics::ContentSystem::StartContentSystem()
     std::for_each(fonts.begin(), fonts.end(), [&](auto& element) { m_fonts->AddFont(element.get<std::string>()); });
 }
 
-void ClayEngine::Graphics::ContentSystem::StopContentSystem()
+void ClayEngine::ContentSystem::StopContentSystem()
 {
     if (m_fonts)
     {
-        Services::RemoveService<FontResources>(std::this_thread::get_id());
+        Services::RemoveService<FontResources>(m_affinity);
         m_fonts.reset();
         m_fonts = nullptr;
     }
 
     if (m_textures)
     {
-        Services::RemoveService<TextureResources>(std::this_thread::get_id());
+        Services::RemoveService<TextureResources>(m_affinity);
         m_textures.reset();
         m_textures = nullptr;
     }
@@ -60,19 +57,19 @@ void ClayEngine::Graphics::ContentSystem::StopContentSystem()
     }
 }
 
-void ClayEngine::Graphics::ContentSystem::RestartContentSystem()
+void ClayEngine::ContentSystem::RestartContentSystem()
 {
     StopContentSystem();
 
     StartContentSystem();
 }
 
-void ClayEngine::Graphics::ContentSystem::OnDeviceLost()
+void ClayEngine::ContentSystem::OnDeviceLost()
 {
 
 }
 
-TextureResourcesRaw ClayEngine::Graphics::ContentSystem::GetTextureResources()
+ClayEngine::TextureResourcesRaw ClayEngine::ContentSystem::GetTextureResources()
 {
     if (m_textures)
         return m_textures.get();
@@ -80,7 +77,7 @@ TextureResourcesRaw ClayEngine::Graphics::ContentSystem::GetTextureResources()
         return nullptr;
 }
 
-FontResourcesRaw ClayEngine::Graphics::ContentSystem::GetFontResources()
+ClayEngine::FontResourcesRaw ClayEngine::ContentSystem::GetFontResources()
 {
     if (m_fonts)
         return m_fonts.get();
@@ -88,12 +85,12 @@ FontResourcesRaw ClayEngine::Graphics::ContentSystem::GetFontResources()
         return nullptr;
 }
 
-TextureRaw ClayEngine::Graphics::ContentSystem::GetTexture(String key)
+ClayEngine::TextureRaw ClayEngine::ContentSystem::GetTexture(String key)
 {
     return m_textures->GetTexture(key);
 }
 
-SpriteFontRaw ClayEngine::Graphics::ContentSystem::GetFont(String key)
+ClayEngine::SpriteFontRaw ClayEngine::ContentSystem::GetFont(String key)
 {
     return m_fonts->GetFont(key);
 }

@@ -84,8 +84,14 @@
   <ItemGroup>
     <ClInclude Include="ClayEngine.h" />
     <ClInclude Include="ClientCore.h" />
+    <ClInclude Include="ContentSystem.h" />
+    <ClInclude Include="DX11PrimitivePipeline.h" />
+    <ClInclude Include="DX11Resources.h" />
+    <ClInclude Include="DX11Textures.h" />
+    <ClInclude Include="InputSystem.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="RenderSystem.h" />
     <ClInclude Include="Services.h" />
     <ClInclude Include="Storage.h" />
     <ClInclude Include="Strings.h" />
@@ -94,15 +100,21 @@
   <ItemGroup>
     <ClCompile Include="ClayEngine.cpp" />
     <ClCompile Include="ClientCore.cpp" />
+    <ClCompile Include="ContentSystem.cpp" />
+    <ClCompile Include="DX11PrimitivePipeline.cpp" />
+    <ClCompile Include="DX11Resources.cpp" />
+    <ClCompile Include="DX11Textures.cpp" />
+    <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="RenderSystem.cpp" />
     <ClCompile Include="Storage.cpp" />
     <ClCompile Include="WindowSystem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DirectXTK\DirectXTK_Desktop_2022.vcxproj">
+    <ProjectReference Include="..\DirectXTK\DirectXTK_Desktop_2019.vcxproj">
       <Project>{e0b52ae7-e160-4d32-bf3f-910b785e5a8e}</Project>
     </ProjectReference>
   </ItemGroup>

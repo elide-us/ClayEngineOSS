@@ -114,8 +114,8 @@ namespace ClayEngine
 #pragma endregion
 
 #pragma region WindowSystem Implementation
-ClayEngine::WindowSystem::WindowSystem(HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName)
-    : m_instance_handle(hInstance), m_show_flags(nCmdShow), m_class_name(className), m_window_name(windowName)
+ClayEngine::WindowSystem::WindowSystem(Affinity affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName)
+    : m_affinity(affinityId), m_instance_handle(hInstance), m_show_flags(nCmdShow), m_class_name(className), m_window_name(windowName)
 {
     WNDCLASSEXW wcex = {};
     wcex.cbSize = sizeof(WNDCLASSEX);

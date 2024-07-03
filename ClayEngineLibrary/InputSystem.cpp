@@ -4,9 +4,9 @@
 #include "WindowSystem.h"
 
 using namespace DirectX;
-using namespace ClayEngine;
 
-InputSystem::InputSystem()
+ClayEngine::InputSystem::InputSystem(ClayEngine::Affinity affinityId)
+	: m_affinity(affinityId)
 {
 	m_input_buffer = std::make_unique<InputBuffer>();
 	m_scrollback_buffer = std::make_unique<ScrollbackBuffer>();
@@ -15,10 +15,10 @@ InputSystem::InputSystem()
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
 	m_mouse = std::make_unique<Mouse>();
-	m_mouse->SetWindow(Services::GetService<WindowSystem>(std::this_thread::get_id())->GetWindowHandle());
+	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle());
 }
 
-InputSystem::~InputSystem()
+ClayEngine::InputSystem::~InputSystem()
 {
 	m_mouse.reset();
 	m_mouse = nullptr;
@@ -33,22 +33,22 @@ InputSystem::~InputSystem()
 	m_input_buffer = nullptr;
 }
 
-void InputSystem::OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam)
+void ClayEngine::InputSystem::OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam)
 {
 	//TODO: Currently deferred to DXTK Mouse class, replacing mouse functionality would be done here...
 }
 
-Mouse::State InputSystem::GetMouseState()
+Mouse::State ClayEngine::InputSystem::GetMouseState()
 {
 	return m_mouse->GetState();
 }
 
-Tracker& InputSystem::GetButtonStateTracker()
+ClayEngine::Tracker& ClayEngine::InputSystem::GetButtonStateTracker()
 {
 	return m_tracker;
 }
 
-void InputSystem::OnKeyDown(WPARAM wParam, LPARAM lParam)
+void ClayEngine::InputSystem::OnKeyDown(WPARAM wParam, LPARAM lParam)
 {
 	SHORT lshift = 0;
 	SHORT rshift = 0;
@@ -143,7 +143,7 @@ void InputSystem::OnKeyDown(WPARAM wParam, LPARAM lParam)
 	}
 } // Updates Keyboard state
 
-void InputSystem::OnKeyUp(WPARAM wParam, LPARAM lParam)
+void ClayEngine::InputSystem::OnKeyUp(WPARAM wParam, LPARAM lParam)
 {
 	SHORT lshift = 0;
 	SHORT rshift = 0;
@@ -169,7 +169,7 @@ void InputSystem::OnKeyUp(WPARAM wParam, LPARAM lParam)
 	}
 }
 
-void InputSystem::OnChar(WPARAM wParam, LPARAM lParam)
+void ClayEngine::InputSystem::OnChar(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam)
 	{
@@ -194,7 +194,7 @@ void InputSystem::OnChar(WPARAM wParam, LPARAM lParam)
 	}
 } // Processes character input (dependent on input state)
 
-Unicode InputSystem::GetBuffer()
+ClayEngine::Unicode ClayEngine::InputSystem::GetBuffer()
 {
 	return m_input_buffer->GetString();
 }
