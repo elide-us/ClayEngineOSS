@@ -1,4 +1,11 @@
 #pragma once
+/******************************************************************************/
+/*                                                                            */
+/* ClayEngineOSS (C) 2024 Elideus                                             */
+/* Services header provides static threaded service registry
+/* https://github.com/elide-us                                                */
+/*                                                                            */
+/******************************************************************************/
 
 #include "TimingSystem.h"
 #include "ClayEngine.h"

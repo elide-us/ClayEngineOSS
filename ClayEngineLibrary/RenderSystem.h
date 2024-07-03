@@ -1,8 +1,9 @@
 #pragma once
 /******************************************************************************/
 /*                                                                            */
-/* ClayEngine Rendering System API Class (C) 2022 Epoch Meridian, LLC.        */
-/*                                                                            */
+/* ClayEngineOSS (C) 2024 Elideus                                             */
+/* Rendering system API class                                                 */
+/* https://github.com/elide-us                                                */
 /*                                                                            */
 /******************************************************************************/
 
