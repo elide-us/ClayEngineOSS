@@ -126,16 +126,18 @@ ClayEngine::WindowSystem::WindowSystem(Affinity affinityId, HINSTANCE hInstance,
     wcex.hInstance = m_instance_handle;
     wcex.hIcon = NULL;
     wcex.hIconSm = NULL;
-    wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+    wcex.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    wcex.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
     wcex.lpszClassName = m_class_name.c_str();
 
     ThrowIfFailed(RegisterClassExW(&wcex));
 
-    m_window_handle = CreateWindowW(m_class_name.c_str(), m_window_name.c_str(), WS_OVERLAPPEDWINDOW,
-        CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, m_instance_handle, nullptr);
+    // m_window_handle = CreateWindowExW(WS_EX_TOPMOST, ..., WS_POPUP,
+    m_window_handle = CreateWindowExW(m_show_flags, m_class_name.c_str(), m_window_name.c_str(), WS_OVERLAPPEDWINDOW,
+        CW_USEDEFAULT, CW_USEDEFAULT, c_default_window_width, c_default_window_height, nullptr, nullptr, m_instance_handle, this);
     if (!m_window_handle) throw std::exception("CreateWindowW() ERROR: Window handle null");
 
+    // m_show_flags = SW_SHOWMAXIMIZED
     ShowWindow(m_window_handle, m_show_flags);
     ShowCursor(true);
     SetWindowTextW(m_window_handle, m_window_name.c_str());
