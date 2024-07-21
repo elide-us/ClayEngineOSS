@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="ClientCore.cpp">
       <Filter>Private</Filter>
     </ClCompile>
@@ -32,12 +31,13 @@
     <ClCompile Include="Storage.cpp">
       <Filter>Private\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="ClayEngine.cpp" />
+    <ClCompile Include="ClayEngine.cpp">
+      <Filter>Private\Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClayEngine.h" />
-    <ClInclude Include="json.hpp" />
-    <ClInclude Include="pch.h" />
     <ClInclude Include="ClientCore.h">
       <Filter>Public</Filter>
     </ClInclude>
@@ -77,6 +77,10 @@
     <ClInclude Include="Voxel.h">
       <Filter>Public\SimpleMath</Filter>
     </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Public\Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Public">

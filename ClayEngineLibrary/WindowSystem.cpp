@@ -18,6 +18,13 @@ namespace ClayEngine
 
         switch (message)
         {
+        //case WM_CREATE:
+        //    if (lParam)
+        //    {
+        //        auto params = reinterpret_cast<LPCREATESTRUCTW>(lParam);
+        //        SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(params->lpCreateParams));
+        //    }
+        //    break;
         case WM_MENUCHAR: // Supress the menu
             return MAKELRESULT(0, MNC_CLOSE);
         case WM_PAINT:

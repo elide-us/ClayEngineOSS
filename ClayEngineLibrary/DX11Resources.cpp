@@ -22,54 +22,122 @@ ClayEngine::DX11Resources::~DX11Resources()
 //TODO:  DX11Resources needs to be reworked, this D3D11CreateDevice call is not working
 void ClayEngine::DX11Resources::StartResources()
 {
+#pragma region Configure Device Debug Flag
+	//Apply debug flags if using debug build
 #ifdef _DEBUG
-	m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
+	m_sdk_layers = SUCCEEDED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_NULL, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, nullptr, nullptr, nullptr));
 #endif
-	// TODO: Modify for supported Direct3D feature levels
-	static const D3D_FEATURE_LEVEL feature_levels[] = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0, D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0, D3D_FEATURE_LEVEL_9_3, D3D_FEATURE_LEVEL_9_2, D3D_FEATURE_LEVEL_9_1, };
+	if (m_sdk_layers) m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
+#pragma endregion
 
-	ComPtr<ID3D11Device> device;
-	ComPtr<ID3D11DeviceContext> context;
+#pragma region Create Device Factory
+	// Create the device factory
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(m_factory.ReleaseAndGetAddressOf())), "ClayEngine CRITICAL: Failed to create DXGI factory");
+#pragma endregion
 
-	ThrowIfFailed(D3D11CreateDevice(
-		nullptr, // default adapter
-		D3D_DRIVER_TYPE_HARDWARE,
-		nullptr,
-		m_creation_flags,
-		feature_levels,
-		_countof(feature_levels),
-		D3D11_SDK_VERSION,
-		device.ReleaseAndGetAddressOf(),
-		&m_feature_level,
-		context.ReleaseAndGetAddressOf()
-	));
-
-#ifndef NDEBUG
-	ComPtr<ID3D11Debug> debug_device;
-	if (SUCCEEDED(device.As(&debug_device)))
+#pragma region Check Device Options
+	// Determines whether tearing support is available for fullscreen borderless windows.
+	if (m_device_options & c_allow_tearing)
 	{
-		ComPtr<ID3D11InfoQueue> info_queue;
-		if (SUCCEEDED(debug_device.As(&info_queue)))
+		bool _tearing = false;
+
+		ComPtr<IDXGIFactory5> factory5;
+		HRESULT hr = m_factory.As(&factory5);
+		if (SUCCEEDED(hr))
 		{
-#ifdef _DEBUG
-			info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
-			info_queue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
-#endif
+			hr = factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &_tearing, sizeof(_tearing));
+		}
 
-			D3D11_INFO_QUEUE_FILTER filter = {};
-			D3D11_MESSAGE_ID hide[] = {
-				D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS,
-			};
-
-			filter.DenyList.NumIDs = _countof(hide);
-			filter.DenyList.pIDList = hide;
+		if (FAILED(hr) || !_tearing)
+		{
+			m_device_options &= ~c_allow_tearing;
 		}
 	}
-#endif
 
-	ThrowIfFailed(device.As(&m_device));
-	ThrowIfFailed(context.As(&m_context));
+	// Disable HDR if we are on an OS that can't support FLIP swap effects
+	if (m_device_options & c_enable_hdr)
+	{
+		ComPtr<IDXGIFactory5> factory5;
+		if (FAILED(m_factory.As(&factory5)))
+		{
+			m_device_options &= ~c_enable_hdr;
+		}
+	}
+
+	// Disable FLIP if not on a supporting OS
+	if (m_device_options & c_flip_present)
+	{
+		ComPtr<IDXGIFactory4> factory4;
+		if (FAILED(m_factory.As(&factory4)))
+		{
+			m_device_options &= ~c_flip_present;
+		}
+	}
+#pragma endregion
+
+	AdapterPtr _adapter; // Our adapter, we'll discard this after device and context creation
+
+#pragma region Enumerate Adapters
+	//Try to cast the factory to version 6 and test for high performance GPU
+	ComPtr<IDXGIFactory6> _factory6;
+	if (SUCCEEDED(m_factory.As(&_factory6)))
+	{
+		for (UINT index = 0;
+			SUCCEEDED(_factory6->EnumAdapterByGpuPreference(index,
+				DXGI_GPU_PREFERENCE_HIGH_PERFORMANCE,
+				IID_PPV_ARGS(_adapter.ReleaseAndGetAddressOf())));
+				index++)
+		{
+			DXGI_ADAPTER_DESC1 _desc;
+			ThrowIfFailed(_adapter->GetDesc1(&_desc));
+
+			if (_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue; // Skip software adapter
+
+			break;
+		}
+	}
+
+	if (!_adapter) // If we fail to cast to version 6, we'll use the legacy method
+	{
+		for (UINT index = 0;
+			SUCCEEDED(m_factory->EnumAdapters1(index, _adapter.ReleaseAndGetAddressOf()));
+			index++)
+		{
+			DXGI_ADAPTER_DESC1 _desc;
+			ThrowIfFailed(_adapter->GetDesc1(&_desc));
+
+			if (_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue; // Skip software adapter
+
+			break;
+		}
+	}
+#pragma endregion
+
+	DevicePtr _device;
+	ContextPtr _context;
+
+	HRESULT _hr = E_FAIL;
+	if (_adapter)
+	{
+		_hr = D3D11CreateDevice(
+			_adapter.Get(),
+			D3D_DRIVER_TYPE_UNKNOWN,
+			nullptr,
+			m_creation_flags,
+			c_feature_levels,
+			c_feature_level_count,
+			D3D11_SDK_VERSION,
+			_device.GetAddressOf(),
+			&m_feature_level,
+			_context.GetAddressOf()
+		);
+	}
+
+	ThrowIfFailed(_hr, "ClayEngine CRITICAL: Failed to create Direct3D device");
+
+	ThrowIfFailed(_device.As(&m_device));
+	ThrowIfFailed(_context.As(&m_context));
+	ThrowIfFailed(_context.As(&m_annotation));
 }
 
 void ClayEngine::DX11Resources::StopResources()

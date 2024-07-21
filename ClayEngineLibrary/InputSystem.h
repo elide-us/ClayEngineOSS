@@ -323,12 +323,12 @@ namespace ClayEngine
 		void InsertString(const Unicode& string)
 		{
 			auto in_time_t = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-			auto out_tm = tm{};
+			auto out_time = tm{};
 
-			auto ec = localtime_s(&out_tm, &in_time_t);
+			auto ec = localtime_s(&out_time, &in_time_t);
 
 			std::stringstream ss;
-			ss << std::put_time(&out_tm, "%Y-%m-%d %X");
+			ss << std::put_time(&out_time, "%Y-%m-%d %X");
 			auto str = ToUnicode(ss.str());
 			std::wstringstream wss;
 			wss << L"[" << str << L"] " << string.c_str();
@@ -501,12 +501,13 @@ namespace ClayEngine
 
 	class InputSystemExtension
 	{
+		Affinity m_affinity;
 	protected:
 		InputSystemRaw m_is = nullptr;
 	public:
 		InputSystemExtension()
 		{
-			m_is = Services::GetService<InputSystem>(std::this_thread::get_id());
+			m_is = Services::GetService<InputSystem>(m_affinity);
 		}
 		~InputSystemExtension()
 		{

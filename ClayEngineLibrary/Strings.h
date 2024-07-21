@@ -117,13 +117,3 @@ namespace ClayEngine
 	}
 
 }
-
-namespace
-{
-	//INFO: This is the hidden flag to enable the debug console
-#ifdef _DEBUG
-	constexpr auto g_debug = true;
-#else
-	constexpr auto g_debug = false;
-#endif
-}
