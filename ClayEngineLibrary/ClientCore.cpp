@@ -61,6 +61,8 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
     auto _input = Services::MakeService<InputSystem>(_affinity);
 
+    auto _test_dx11resources = std::make_unique<DX11Resources>(_affinity, 0);
+
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);
     

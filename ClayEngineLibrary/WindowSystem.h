@@ -17,8 +17,10 @@ namespace ClayEngine
 	using Function = std::function<void()>;
 	using Functions = std::vector<Function>;
 
-	constexpr auto c_default_window_width = 1920U;
-	constexpr auto c_default_window_height = 1080U;
+	//constexpr auto c_default_window_width = 1920U;
+	//constexpr auto c_default_window_height = 1080U;
+	constexpr auto c_default_window_width = 800U;
+	constexpr auto c_default_window_height = 600U;
 
 	/// <summary>
 	/// This is the primary class for a window, and handles all of the message callbacks

@@ -7,21 +7,20 @@
 ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale)
 	: m_hInstance(hInstance), m_cmdLine(lpCmdLine), m_cmdShow(nCmdShow)
 {
-	if (FAILED(CoInitializeEx(nullptr, COINITBASE_MULTITHREADED))) throw std::exception("ClayEngine CRITICAL: Failed to Initialize COM");
 	if (!DirectX::XMVerifyCPUSupport()) throw std::exception("ClayEngine CRITICAL: CPU Unsupported");
+	if (FAILED(CoInitializeEx(nullptr, COINITBASE_MULTITHREADED))) throw std::exception("ClayEngine CRITICAL: Failed to Initialize COM");
 
-	if (g_debug)
+#ifdef _DEBUG
+	if (AllocConsole())
 	{
-		if (AllocConsole())
-		{
-			FILE* file = nullptr;
-			_wfreopen_s(&file, L"CONIN$", L"r", stdin);
-			_wfreopen_s(&file, L"CONOUT$", L"w", stdout);
-			_wfreopen_s(&file, L"CONOUT$", L"w", stderr);
-			WriteLine("ClayEngine INFO: Allocated default console");
-		}
-		else WriteLine("ClayEngine WARNING: Failed to allocate default console");
+		FILE* file = nullptr;
+		_wfreopen_s(&file, L"CONIN$", L"r", stdin);
+		_wfreopen_s(&file, L"CONOUT$", L"w", stdout);
+		_wfreopen_s(&file, L"CONOUT$", L"w", stderr);
+		WriteLine("ClayEngine INFO: Allocated default console");
 	}
+	else WriteLine("ClayEngine WARNING: Failed to allocate default console");
+#endif
 
 	// Intentionally hard-coded, this is your default startup file
 	m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_json);

@@ -2,7 +2,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* ClayEngineOSS (C) 2024 Elideus                                             */
-/* Services header provides static threaded service registry
+/* Services header provides static threaded service registry                  */
 /* https://github.com/elide-us                                                */
 /*                                                                            */
 /******************************************************************************/
@@ -166,11 +166,10 @@ namespace ClayEngine
 					return p;
 				}
 
-				if (g_debug)
-				{
-					wss << __func__ << L"() ERROR: Service not found.";
-					WriteLine(wss.str());
-				}
+#ifdef _DEBUG
+				wss << __func__ << L"() ERROR: Service not found.";
+				WriteLine(wss.str());
+#endif
 
 				return nullptr;
 			}
