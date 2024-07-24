@@ -23,11 +23,11 @@ ClayEngine::DX11Resources::~DX11Resources()
 void ClayEngine::DX11Resources::StartResources()
 {
 #pragma region Configure Device Debug Flag
-	//Apply debug flags if using debug build
 #ifdef _DEBUG
-	m_sdk_layers = SUCCEEDED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_NULL, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, nullptr, nullptr, nullptr));
+	//Apply debug flags if using debug build
+	if (SUCCEEDED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_NULL, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, nullptr, nullptr, nullptr)))
+		m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
-	if (m_sdk_layers) m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
 #pragma endregion
 
 #pragma region Create Device Factory
@@ -75,7 +75,7 @@ void ClayEngine::DX11Resources::StartResources()
 	}
 #pragma endregion
 
-	AdapterPtr _adapter; // Our adapter, we'll discard this after device and context creation
+	ComPtr<IDXGIAdapter1> _adapter; // Our adapter, we'll discard this after device and context creation
 
 #pragma region Enumerate Adapters
 	//Try to cast the factory to version 6 and test for high performance GPU
@@ -89,7 +89,7 @@ void ClayEngine::DX11Resources::StartResources()
 				index++)
 		{
 			DXGI_ADAPTER_DESC1 _desc;
-			ThrowIfFailed(_adapter->GetDesc1(&_desc));
+			ThrowIfFailed(_adapter->GetDesc1(&_desc), "ClayEngine ERROR: Failed to get DESC from adapter");
 
 			if (_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue; // Skip software adapter
 
@@ -104,7 +104,7 @@ void ClayEngine::DX11Resources::StartResources()
 			index++)
 		{
 			DXGI_ADAPTER_DESC1 _desc;
-			ThrowIfFailed(_adapter->GetDesc1(&_desc));
+			ThrowIfFailed(_adapter->GetDesc1(&_desc), "ClayEngine ERROR: Failed to get DESC from adapter");
 
 			if (_desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue; // Skip software adapter
 
@@ -113,9 +113,10 @@ void ClayEngine::DX11Resources::StartResources()
 	}
 #pragma endregion
 
-	DevicePtr _device;
-	ContextPtr _context;
+	ComPtr<ID3D11Device> _device;
+	ComPtr<ID3D11DeviceContext> _context;
 
+#pragma region Create Device
 	HRESULT _hr = E_FAIL;
 	if (_adapter)
 	{
@@ -132,20 +133,70 @@ void ClayEngine::DX11Resources::StartResources()
 			_context.GetAddressOf()
 		);
 	}
+	if (FAILED(_hr))
+	{
+		_hr = D3D11CreateDevice(
+			nullptr,
+			D3D_DRIVER_TYPE_WARP,
+			nullptr,
+			m_creation_flags,
+			c_feature_levels,
+			c_feature_level_count,
+			D3D11_SDK_VERSION,
+			_device.GetAddressOf(),
+			&m_feature_level,
+			_context.GetAddressOf()
+		);
+
+		if (SUCCEEDED(_hr))
+		{
+			WriteLine("ClayEngine WARNING: Using WARP adapter for rendering.");
+		}
+	}
 
 	ThrowIfFailed(_hr, "ClayEngine CRITICAL: Failed to create Direct3D device");
+#pragma endregion
 
-	ThrowIfFailed(_device.As(&m_device));
-	ThrowIfFailed(_context.As(&m_context));
-	ThrowIfFailed(_context.As(&m_annotation));
+#pragma region Enable Debug Layer
+#ifdef _DEBUG
+	ComPtr<ID3D11Debug> _debug;
+	if (SUCCEEDED(_device.As(&_debug)))
+	{
+		ComPtr<ID3D11InfoQueue> _info;
+		if (SUCCEEDED(_debug.As(&_info)))
+		{
+			D3D11_MESSAGE_ID _hide[] =
+			{
+				D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS
+			};
+
+			D3D11_INFO_QUEUE_FILTER _filter = {};
+			_filter.DenyList.NumIDs = static_cast<UINT>(std::size(_hide));
+			_filter.DenyList.pIDList = _hide;
+
+			_info->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, true);
+			_info->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, true);
+			//_info->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, true);
+			//_info->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_INFO, true);
+			//_info->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_MESSAGE, true);
+
+			_info->AddStorageFilterEntries(&_filter);
+		}
+	}
+#endif
+#pragma endregion
+
+	ThrowIfFailed(_device.As(&m_device), "ClayEngine ERROR: Failed to cast device");
+	ThrowIfFailed(_context.As(&m_device_context), "ClayEngine ERROR: Failed to cast context");
+	ThrowIfFailed(_context.As(&m_annotation), "ClayEngine ERROR: Failed to cast annotation");
 }
 
 void ClayEngine::DX11Resources::StopResources()
 {
-	if (m_context)
+	if (m_device_context)
 	{
-		m_context.Reset();
-		m_context = nullptr;
+		m_device_context.Reset();
+		m_device_context = nullptr;
 	}
 
 	if (m_device)
@@ -164,85 +215,71 @@ void ClayEngine::DX11Resources::RestartResources()
 
 void ClayEngine::DX11Resources::StartPipeline()
 {
-	auto hwnd = Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle();
+	auto _hwnd = Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle();
+	if (!_hwnd) throw std::exception("WindowSystem must be initialised first");
+	auto _size = Services::GetService<WindowSystem>(m_affinity)->GetWindowSize();
 
 	// Clear the previous window size specific context.
-	ID3D11RenderTargetView* views[] = { nullptr };
-	m_context->OMSetRenderTargets(_countof(views), views, nullptr);
+	m_device_context->OMSetRenderTargets(0, nullptr, nullptr);
+	m_rendertarget_context.Reset();
+	m_depthstencil_context.Reset();
 	m_rendertarget.Reset();
 	m_depthstencil.Reset();
-	m_context->Flush();
+	m_device_context->Flush();
 
-	//const UINT backbuffer_width = static_cast<UINT>(rect.right - rect.left);
-	auto backbuffer_width = UINT(1920);
-	auto backbuffer_height = UINT(1080);
-	auto backbuffer_count = 2u;
-
-	const DXGI_FORMAT rendertarget_format = { DXGI_FORMAT_B8G8R8A8_UNORM };
-	const DXGI_FORMAT depthstencil_format = { DXGI_FORMAT_D24_UNORM_S8_UINT };
-
-	const auto depthstencil_desc = CD3D11_TEXTURE2D_DESC{ depthstencil_format, backbuffer_width, backbuffer_height, 1, 1, D3D11_BIND_DEPTH_STENCIL };
-	const auto depthstencilview_desc = CD3D11_DEPTH_STENCIL_VIEW_DESC{ D3D11_DSV_DIMENSION_TEXTURE2D };
+	const auto _bbw = std::max<UINT>(static_cast<UINT>(_size.right - _size.left), 1u);
+	const auto _bbh = std::max<UINT>(static_cast<UINT>(_size.bottom - _size.top), 1u);
+	const auto _bbf = (m_device_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
+		? NoSRGB(m_backbuffer_format) : m_backbuffer_format;
 
 	// This is definitely not right, this is checking ResizeBuffers every frame?!?!
 	if (m_swapchain)
 	{
-		HRESULT hr = m_swapchain->ResizeBuffers(backbuffer_count, backbuffer_width, backbuffer_height, rendertarget_format, 0);
+		//HRESULT hr = m_swapchain->ResizeBuffers(backbuffer_count, backbuffer_width, backbuffer_height, rendertarget_format, 0);
 
-		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
-		{
-			//Services::GetService<RenderSystem>(std::this_thread::get_id())->RestartRenderSystem();
-			//TODO: This should be signaling WindowSystem::OnDeviceLost() or something like that...
-			return;
-		}
-		else
-		{
-			ThrowIfFailed(hr);
-		}
+		//if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+		//{
+		//	//Services::GetService<RenderSystem>(std::this_thread::get_id())->RestartRenderSystem();
+		//	//TODO: This should be signaling WindowSystem::OnDeviceLost() or something like that...
+		//	return;
+		//}
+		//else
+		//{
+		//	ThrowIfFailed(hr);
+		//}
 	}
 	else
 	{
-		ComPtr<IDXGIDevice1> dxgi_device;
-		ThrowIfFailed(m_device.As(&dxgi_device));
+		DXGI_SWAP_CHAIN_DESC1 _scd = {};
+		_scd.Width = _bbw;
+		_scd.Height = _bbh;
+		_scd.Format = _bbf;
+		_scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		_scd.BufferCount = m_backbuffer_count;
+		_scd.SampleDesc.Count = 1;
+		_scd.SampleDesc.Quality = 0;
+		_scd.Scaling = DXGI_SCALING_STRETCH;
+		_scd.SwapEffect = (m_device_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
+			? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
+		_scd.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+		_scd.Flags = (m_device_options & c_allow_tearing)
+			? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u;
 
-		ComPtr<IDXGIAdapter> dxgi_adapter;
-		ThrowIfFailed(dxgi_device->GetAdapter(dxgi_adapter.GetAddressOf()));
+		DXGI_SWAP_CHAIN_FULLSCREEN_DESC _fsscd = {};
+		_fsscd.Windowed = true;
 
-		ComPtr<IDXGIFactory2> dxgi_factory;
-		ThrowIfFailed(dxgi_adapter->GetParent(IID_PPV_ARGS(dxgi_factory.GetAddressOf())));
+		HRESULT _hr = S_OK;
+		_hr = m_factory->CreateSwapChainForHwnd(
+			m_device.Get(), _hwnd, &_scd, &_fsscd, nullptr,
+			m_swapchain.ReleaseAndGetAddressOf());
+		if (FAILED(_hr)) throw std::exception("CreateSwapChainForHwnd");
 
-		// Create a descriptor for the swap chain.
-		DXGI_SWAP_CHAIN_DESC1 swapchain_desc = {};
-		swapchain_desc.Width = backbuffer_width;
-		swapchain_desc.Height = backbuffer_height;
-		swapchain_desc.Format = rendertarget_format;
-		swapchain_desc.SampleDesc.Count = 1;
-		swapchain_desc.SampleDesc.Quality = 0;
-		swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		swapchain_desc.BufferCount = backbuffer_count;
+		_hr = S_OK;
+		_hr = m_factory->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
+		if (FAILED(_hr)) throw std::exception("MakeWindowAssociation");
 
-		DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapchain_desc_fs = {};
-		swapchain_desc_fs.Windowed = TRUE;
 
-		// Create a SwapChain from a Win32 window.
-		ThrowIfFailed(dxgi_factory->CreateSwapChainForHwnd(m_device.Get(), hwnd,
-			&swapchain_desc, &swapchain_desc_fs, nullptr, m_swapchain.ReleaseAndGetAddressOf()));
-
-		// This template does not support exclusive fullscreen mode and prevents DXGI from responding to the ALT+ENTER shortcut.
-		ThrowIfFailed(dxgi_factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 	}
-
-	// Obtain the backbuffer for this window which will be the final 3D rendertarget.
-	ThrowIfFailed(m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_buffer.GetAddressOf())));
-
-	// Create a view interface on the rendertarget to use on bind.
-	ThrowIfFailed(m_device->CreateRenderTargetView(m_rendertarget_buffer.Get(), nullptr, m_rendertarget.ReleaseAndGetAddressOf()));
-
-	// Allocate a 2-D surface as the depth/stencil buffer and
-	// create a DepthStencil view on this surface to use on bind.
-	ThrowIfFailed(m_device->CreateTexture2D(&depthstencil_desc, nullptr, m_depthstencil_buffer.GetAddressOf()));
-
-	ThrowIfFailed(m_device->CreateDepthStencilView(m_depthstencil_buffer.Get(), &depthstencilview_desc, m_depthstencil.ReleaseAndGetAddressOf()));
 }
 
 void ClayEngine::DX11Resources::StopPipeline()
@@ -288,8 +325,8 @@ ClayEngine::DeviceRaw ClayEngine::DX11Resources::GetDevice()
 
 ClayEngine::ContextRaw ClayEngine::DX11Resources::GetContext()
 {
-	if (m_context)
-		return m_context.Get();
+	if (m_device_context)
+		return m_device_context.Get();
 	else
 		return nullptr;
 }

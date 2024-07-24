@@ -15,13 +15,13 @@ using Microsoft::WRL::ComPtr;
 namespace ClayEngine
 {
 	using FactoryPtr = ComPtr<IDXGIFactory2>;
-	using AdapterPtr = ComPtr<IDXGIAdapter1>;
-	using DevicePtr = ComPtr<ID3D11Device>;
-	using DeviceRaw = ID3D11Device*;
-	using ContextPtr = ComPtr<ID3D11DeviceContext>;
-	using ContextRaw = ID3D11DeviceContext*;
+	using DevicePtr = ComPtr<ID3D11Device1>;
+	using DeviceRaw = ID3D11Device1*;
+	using ContextPtr = ComPtr<ID3D11DeviceContext1>;
+	using ContextRaw = ID3D11DeviceContext1*;
 	using SwapChainPtr = ComPtr<IDXGISwapChain1>;
 	using SwapChainRaw = IDXGISwapChain1*;
+
 	using RenderTargetPtr = ComPtr<ID3D11Texture2D>;
 	using DepthStencilPtr = ComPtr<ID3D11Texture2D>;
 	using RenderTargetViewPtr = ComPtr<ID3D11RenderTargetView>;
@@ -29,9 +29,10 @@ namespace ClayEngine
 	using DepthStencilViewPtr = ComPtr<ID3D11DepthStencilView>;
 	using DepthStencilViewRaw = ID3D11DepthStencilView*;
 
-	constexpr unsigned int c_flip_present = 0x1;
-	constexpr unsigned int c_allow_tearing = 0x2;
-	constexpr unsigned int c_enable_hdr = 0x4;
+	// Used by the swap chain SwapEffect property
+	constexpr UINT c_flip_present = 0x1;
+	constexpr UINT c_allow_tearing = 0x2;
+	constexpr UINT c_enable_hdr = 0x4;
 
 	constexpr D3D_FEATURE_LEVEL c_feature_levels[] = {
 		D3D_FEATURE_LEVEL_11_1,
@@ -68,24 +69,31 @@ namespace ClayEngine
 		Affinity m_affinity;
 
 		bool m_sdk_layers = false;
-		unsigned int m_device_options = 0x0;
+		unsigned int m_device_options = c_flip_present | c_allow_tearing | c_enable_hdr;
 
 		UINT m_creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-		D3D_FEATURE_LEVEL m_min_feature_level = D3D_FEATURE_LEVEL_11_1;
 
+		D3D_FEATURE_LEVEL m_min_feature_level = D3D_FEATURE_LEVEL_10_0;
 		D3D_FEATURE_LEVEL m_feature_level = {};
 
 		FactoryPtr m_factory = nullptr;
 		DevicePtr m_device = nullptr;
-		ContextPtr m_context = nullptr;
+		ContextPtr m_device_context = nullptr;
+		SwapChainPtr m_swapchain = nullptr;
 		ContextPtr m_annotation = nullptr;
 
+		D3D11_VIEWPORT m_viewport = {};
+		DXGI_COLOR_SPACE_TYPE m_colorspace = {};
+
+		DXGI_FORMAT m_backbuffer_format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		DXGI_FORMAT m_depthbuffer_format = DXGI_FORMAT_D32_FLOAT;
+		UINT m_backbuffer_count = 2;
+
+		// Old
 		bool m_device_lost = true;
-
-		SwapChainPtr m_swapchain = nullptr;
-
-		RenderTargetPtr m_rendertarget_buffer = nullptr;
-		DepthStencilPtr m_depthstencil_buffer = nullptr;
+	
+		RenderTargetPtr m_rendertarget_context = nullptr;
+		DepthStencilPtr m_depthstencil_context = nullptr;
 
 		RenderTargetViewPtr m_rendertarget = nullptr;
 		DepthStencilViewPtr m_depthstencil = nullptr;
