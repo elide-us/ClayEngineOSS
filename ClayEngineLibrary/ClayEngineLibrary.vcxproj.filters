@@ -35,6 +35,9 @@
       <Filter>Private\Utility</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp" />
+    <ClCompile Include="DX11Device.cpp">
+      <Filter>Private\Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ClayEngine.h" />
@@ -81,6 +84,9 @@
       <Filter>Public\Utility</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="DX11Device.h">
+      <Filter>Public\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Public">

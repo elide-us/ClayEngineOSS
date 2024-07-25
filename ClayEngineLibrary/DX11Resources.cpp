@@ -232,21 +232,24 @@ void ClayEngine::DX11Resources::StartPipeline()
 	const auto _bbf = (m_device_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
 		? NoSRGB(m_backbuffer_format) : m_backbuffer_format;
 
-	// This is definitely not right, this is checking ResizeBuffers every frame?!?!
 	if (m_swapchain)
 	{
-		//HRESULT hr = m_swapchain->ResizeBuffers(backbuffer_count, backbuffer_width, backbuffer_height, rendertarget_format, 0);
+		HRESULT _hr = m_swapchain->ResizeBuffers(
+			m_backbuffer_count,
+			_bbw, _bbh, _bbf,
+			(m_device_options & c_allow_tearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u
+		);
 
-		//if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
-		//{
-		//	//Services::GetService<RenderSystem>(std::this_thread::get_id())->RestartRenderSystem();
-		//	//TODO: This should be signaling WindowSystem::OnDeviceLost() or something like that...
-		//	return;
-		//}
-		//else
-		//{
-		//	ThrowIfFailed(hr);
-		//}
+		if (_hr == DXGI_ERROR_DEVICE_REMOVED || _hr == DXGI_ERROR_DEVICE_RESET)
+		{
+			//Services::GetService<RenderSystem>(m_affinity)->RestartRenderSystem();
+			//TODO: This should be signaling WindowSystem::OnDeviceLost() or something like that...
+			return;
+		}
+		else
+		{
+			ThrowIfFailed(_hr);
+		}
 	}
 	else
 	{
