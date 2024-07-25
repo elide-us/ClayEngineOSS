@@ -85,6 +85,7 @@
     <ClInclude Include="ClayEngine.h" />
     <ClInclude Include="ClientCore.h" />
     <ClInclude Include="ContentSystem.h" />
+    <ClInclude Include="DX11Device.h" />
     <ClInclude Include="DX11PrimitivePipeline.h" />
     <ClInclude Include="DX11Resources.h" />
     <ClInclude Include="DX11Textures.h" />
@@ -103,6 +104,7 @@
     <ClCompile Include="ClayEngine.cpp" />
     <ClCompile Include="ClientCore.cpp" />
     <ClCompile Include="ContentSystem.cpp" />
+    <ClCompile Include="DX11Device.cpp" />
     <ClCompile Include="DX11PrimitivePipeline.cpp" />
     <ClCompile Include="DX11Resources.cpp" />
     <ClCompile Include="DX11Textures.cpp" />
