@@ -73,6 +73,6 @@ namespace ClayEngine
 		// Handle OnDeviceLost Events in this class and pass to WindowSystem, RenderSystem, etc.
 		// Consider how to handle callbacks, the style we wrote works, but it's kinda a PITA.
 	};
-	using DX11DevicePtr = std::unique_ptr<DX11DeviceFactory>;
-	using DX11DeviceRaw = DX11DeviceFactory*;
+	using DX11DeviceFactoryPtr = std::unique_ptr<DX11DeviceFactory>;
+	using DX11DeviceFactoryRaw = DX11DeviceFactory*;
 }

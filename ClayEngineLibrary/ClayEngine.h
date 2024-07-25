@@ -33,7 +33,7 @@ namespace ClayEngine
 		JsonFilePtr m_bootstrap = {}; // Loads clayengine.json
 
 		AffinityData m_affinity_data = {};
-		DX11DevicePtr m_device = nullptr;
+		DX11DeviceFactoryPtr m_device = nullptr;
 
 		// These maps contain the kernels for each client and server running within this process
 		// There should typically only be one Server running to minimize resource usage since 
