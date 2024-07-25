@@ -13,7 +13,8 @@
 #include "Strings.h" // String and error handling
 #include "Storage.h" // Filesystem and JSON parsing
 
-#include "ClientCore.h"
+#include "DX11DeviceFactory.h"
+#include "ClayEngineClient.h"
 //#include "ServerCore.h"
 //#include "HeadlessCore.h"
 
@@ -30,6 +31,9 @@ namespace ClayEngine
 		UINT m_cmdShow; // The window display flags, eg. SW_SHOWDEFAULT
 
 		JsonFilePtr m_bootstrap = {}; // Loads clayengine.json
+
+		AffinityData m_affinity_data = {};
+		DX11DevicePtr m_device = nullptr;
 
 		// These maps contain the kernels for each client and server running within this process
 		// There should typically only be one Server running to minimize resource usage since 

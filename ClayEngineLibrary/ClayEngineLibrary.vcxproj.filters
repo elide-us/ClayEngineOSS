@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="ClientCore.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="WindowSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="InputSystem.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
     <ClCompile Include="DX11PrimitivePipeline.cpp">
       <Filter>Private\Graphics</Filter>
     </ClCompile>
@@ -31,25 +22,22 @@
     <ClCompile Include="Storage.cpp">
       <Filter>Private\Utility</Filter>
     </ClCompile>
-    <ClCompile Include="ClayEngine.cpp">
-      <Filter>Private\Utility</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp" />
-    <ClCompile Include="DX11Device.cpp">
+    <ClCompile Include="DX11DeviceFactory.cpp">
       <Filter>Private\Graphics</Filter>
     </ClCompile>
+    <ClCompile Include="ClayEngineClient.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="ClayEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ClayEngine.h" />
-    <ClInclude Include="ClientCore.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="WindowSystem.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="InputSystem.h">
-      <Filter>Public</Filter>
-    </ClInclude>
     <ClInclude Include="DX11PrimitivePipeline.h">
       <Filter>Public\Graphics</Filter>
     </ClInclude>
@@ -84,21 +72,40 @@
       <Filter>Public\Utility</Filter>
     </ClInclude>
     <ClInclude Include="pch.h" />
-    <ClInclude Include="DX11Device.h">
+    <ClInclude Include="DX11DeviceFactory.h">
       <Filter>Public\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="ClayEngineClient.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="InputSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="ClayEngine.h" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Public">
-      <UniqueIdentifier>{4f35a41b-0986-480d-87e3-a4eedf82a7a3}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
     <Filter Include="Private">
       <UniqueIdentifier>{94cb5c00-f187-4a39-b659-72bb9503d530}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Private\Graphics">
       <UniqueIdentifier>{9ac188c7-7618-4978-b875-c83a9e83efe1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Private\SimpleMath">
+      <UniqueIdentifier>{7706ee5d-908d-4d05-9750-9f29c8bc1cdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Private\Utility">
+      <UniqueIdentifier>{88fce877-63d9-4c64-a723-bf59b39d9136}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Private\Systems">
+      <UniqueIdentifier>{36b2bde0-b2a5-4425-8257-8ee973efdd70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Public">
+      <UniqueIdentifier>{4f35a41b-0986-480d-87e3-a4eedf82a7a3}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
     <Filter Include="Public\Graphics">
       <UniqueIdentifier>{dd8f5d2a-ed75-431d-a939-976ee693ba03}</UniqueIdentifier>
@@ -109,11 +116,8 @@
     <Filter Include="Public\SimpleMath">
       <UniqueIdentifier>{6b466c99-ba59-4453-82e3-52aa8d92eb8f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Private\SimpleMath">
-      <UniqueIdentifier>{7706ee5d-908d-4d05-9750-9f29c8bc1cdd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Private\Utility">
-      <UniqueIdentifier>{88fce877-63d9-4c64-a723-bf59b39d9136}</UniqueIdentifier>
+    <Filter Include="Public\Systems">
+      <UniqueIdentifier>{59c08fee-d9d5-4e82-adea-05992240bd9c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

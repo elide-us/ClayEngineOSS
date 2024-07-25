@@ -26,7 +26,7 @@ namespace ClayEngine
 	/// </summary>
 	class RenderSystem
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity;
 
 		DX11ResourcesPtr m_resources = nullptr;
 
@@ -36,7 +36,7 @@ namespace ClayEngine
 		bool m_device_lost = true;
 
 	public:
-		RenderSystem(Affinity affinityId);
+		RenderSystem(AffinityData affinityId);
 		~RenderSystem();
 
 		void StartRenderSystem();

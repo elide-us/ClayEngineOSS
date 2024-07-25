@@ -27,7 +27,7 @@ namespace ClayEngine
 	/// </summary>
 	class WindowSystem
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity;
 
 		HINSTANCE m_instance_handle = NULL;
 		int m_show_flags = SW_SHOWDEFAULT;
@@ -50,7 +50,7 @@ namespace ClayEngine
 		Functions s_onchar = {};
 
 	public:
-		WindowSystem(Affinity affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
+		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
 		~WindowSystem();
 
 		#pragma region Window class accessors

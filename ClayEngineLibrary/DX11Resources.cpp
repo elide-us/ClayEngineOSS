@@ -2,11 +2,15 @@
 #include "DX11Resources.h"
 
 #include "Strings.h"
+#include "DX11DeviceFactory.h"
 #include "WindowSystem.h"
 
-ClayEngine::DX11Resources::DX11Resources(Affinity affinityId, UINT flags)
-	: m_affinity(affinityId), m_creation_flags(flags)
+#pragma region Constructor and Destructor
+ClayEngine::DX11Resources::DX11Resources(AffinityData affinityData)
+	: m_affinity_data(affinityData)
 {
+	m_feature_level = Services::GetService<DX11DeviceFactory>(m_affinity_data.root_thread)->GetFeatureLevel();
+
 	StartResources();
 
 	StartPipeline();
@@ -18,69 +22,19 @@ ClayEngine::DX11Resources::~DX11Resources()
 
 	StopResources();
 }
+#pragma endregion
 
-//TODO:  DX11Resources needs to be reworked, this D3D11CreateDevice call is not working
 void ClayEngine::DX11Resources::StartResources()
 {
-#pragma region Configure Device Debug Flag
-#ifdef _DEBUG
-	//Apply debug flags if using debug build
-	if (SUCCEEDED(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_NULL, nullptr, D3D11_CREATE_DEVICE_DEBUG, nullptr, 0, D3D11_SDK_VERSION, nullptr, nullptr, nullptr)))
-		m_creation_flags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-#pragma endregion
+	auto _flags = Services::GetService<DX11DeviceFactory>(m_affinity_data.root_thread)->GetCreationFlags();
+	auto _factory = Services::GetService<DX11DeviceFactory>(m_affinity_data.root_thread)->GetFactory();
 
-#pragma region Create Device Factory
-	// Create the device factory
-	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(m_factory.ReleaseAndGetAddressOf())), "ClayEngine CRITICAL: Failed to create DXGI factory");
-#pragma endregion
-
-#pragma region Check Device Options
-	// Determines whether tearing support is available for fullscreen borderless windows.
-	if (m_device_options & c_allow_tearing)
-	{
-		bool _tearing = false;
-
-		ComPtr<IDXGIFactory5> factory5;
-		HRESULT hr = m_factory.As(&factory5);
-		if (SUCCEEDED(hr))
-		{
-			hr = factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING, &_tearing, sizeof(_tearing));
-		}
-
-		if (FAILED(hr) || !_tearing)
-		{
-			m_device_options &= ~c_allow_tearing;
-		}
-	}
-
-	// Disable HDR if we are on an OS that can't support FLIP swap effects
-	if (m_device_options & c_enable_hdr)
-	{
-		ComPtr<IDXGIFactory5> factory5;
-		if (FAILED(m_factory.As(&factory5)))
-		{
-			m_device_options &= ~c_enable_hdr;
-		}
-	}
-
-	// Disable FLIP if not on a supporting OS
-	if (m_device_options & c_flip_present)
-	{
-		ComPtr<IDXGIFactory4> factory4;
-		if (FAILED(m_factory.As(&factory4)))
-		{
-			m_device_options &= ~c_flip_present;
-		}
-	}
-#pragma endregion
-
-	ComPtr<IDXGIAdapter1> _adapter; // Our adapter, we'll discard this after device and context creation
+	ComPtr<IDXGIAdapter1> _adapter;
 
 #pragma region Enumerate Adapters
 	//Try to cast the factory to version 6 and test for high performance GPU
 	ComPtr<IDXGIFactory6> _factory6;
-	if (SUCCEEDED(m_factory.As(&_factory6)))
+	if (SUCCEEDED(_factory.As(&_factory6)))
 	{
 		for (UINT index = 0;
 			SUCCEEDED(_factory6->EnumAdapterByGpuPreference(index,
@@ -100,7 +54,7 @@ void ClayEngine::DX11Resources::StartResources()
 	if (!_adapter) // If we fail to cast to version 6, we'll use the legacy method
 	{
 		for (UINT index = 0;
-			SUCCEEDED(m_factory->EnumAdapters1(index, _adapter.ReleaseAndGetAddressOf()));
+			SUCCEEDED(_factory->EnumAdapters1(index, _adapter.ReleaseAndGetAddressOf()));
 			index++)
 		{
 			DXGI_ADAPTER_DESC1 _desc;
@@ -124,7 +78,7 @@ void ClayEngine::DX11Resources::StartResources()
 			_adapter.Get(),
 			D3D_DRIVER_TYPE_UNKNOWN,
 			nullptr,
-			m_creation_flags,
+			_flags,
 			c_feature_levels,
 			c_feature_level_count,
 			D3D11_SDK_VERSION,
@@ -133,13 +87,13 @@ void ClayEngine::DX11Resources::StartResources()
 			_context.GetAddressOf()
 		);
 	}
-	if (FAILED(_hr))
+  	if (FAILED(_hr))
 	{
 		_hr = D3D11CreateDevice(
 			nullptr,
 			D3D_DRIVER_TYPE_WARP,
 			nullptr,
-			m_creation_flags,
+			_flags,
 			c_feature_levels,
 			c_feature_level_count,
 			D3D11_SDK_VERSION,
@@ -215,9 +169,11 @@ void ClayEngine::DX11Resources::RestartResources()
 
 void ClayEngine::DX11Resources::StartPipeline()
 {
-	auto _hwnd = Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle();
-	if (!_hwnd) throw std::exception("WindowSystem must be initialised first");
-	auto _size = Services::GetService<WindowSystem>(m_affinity)->GetWindowSize();
+	auto _hwnd = Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle();
+	auto _size = Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowSize();
+	auto _options = Services::GetService<DX11DeviceFactory>(m_affinity_data.root_thread)->GetDeviceOptions();
+	auto _factory = Services::GetService<DX11DeviceFactory>(m_affinity_data.root_thread)->GetFactory();
+
 
 	// Clear the previous window size specific context.
 	m_device_context->OMSetRenderTargets(0, nullptr, nullptr);
@@ -229,7 +185,7 @@ void ClayEngine::DX11Resources::StartPipeline()
 
 	const auto _bbw = std::max<UINT>(static_cast<UINT>(_size.right - _size.left), 1u);
 	const auto _bbh = std::max<UINT>(static_cast<UINT>(_size.bottom - _size.top), 1u);
-	const auto _bbf = (m_device_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
+	const auto _bbf = (_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
 		? NoSRGB(m_backbuffer_format) : m_backbuffer_format;
 
 	if (m_swapchain)
@@ -237,7 +193,7 @@ void ClayEngine::DX11Resources::StartPipeline()
 		HRESULT _hr = m_swapchain->ResizeBuffers(
 			m_backbuffer_count,
 			_bbw, _bbh, _bbf,
-			(m_device_options & c_allow_tearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u
+			(_options & c_allow_tearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u
 		);
 
 		if (_hr == DXGI_ERROR_DEVICE_REMOVED || _hr == DXGI_ERROR_DEVICE_RESET)
@@ -262,23 +218,23 @@ void ClayEngine::DX11Resources::StartPipeline()
 		_scd.SampleDesc.Count = 1;
 		_scd.SampleDesc.Quality = 0;
 		_scd.Scaling = DXGI_SCALING_STRETCH;
-		_scd.SwapEffect = (m_device_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
+		_scd.SwapEffect = (_options & (c_flip_present | c_allow_tearing | c_enable_hdr))
 			? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
 		_scd.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-		_scd.Flags = (m_device_options & c_allow_tearing)
+		_scd.Flags = (_options & c_allow_tearing)
 			? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u;
 
 		DXGI_SWAP_CHAIN_FULLSCREEN_DESC _fsscd = {};
 		_fsscd.Windowed = true;
 
 		HRESULT _hr = S_OK;
-		_hr = m_factory->CreateSwapChainForHwnd(
+		_hr = _factory->CreateSwapChainForHwnd(
 			m_device.Get(), _hwnd, &_scd, &_fsscd, nullptr,
 			m_swapchain.ReleaseAndGetAddressOf());
 		if (FAILED(_hr)) throw std::exception("CreateSwapChainForHwnd");
 
 		_hr = S_OK;
-		_hr = m_factory->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
+		_hr = _factory->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
 		if (FAILED(_hr)) throw std::exception("MakeWindowAssociation");
 
 

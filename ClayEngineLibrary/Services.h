@@ -24,6 +24,12 @@
 
 namespace ClayEngine
 {
+	struct AffinityData
+	{
+		std::thread::id this_thread;
+		std::thread::id root_thread;
+	};
+
 	using Type = std::type_index;
 	using Object = void*;
 
@@ -52,16 +58,16 @@ namespace ClayEngine
 		/// remove the entry when the service is deconstructed.
 		/// </summary>
 		template<typename T, typename... Args>
-		static std::unique_ptr<T> MakeService(Affinity threadId, Args&&... args)
+		static std::unique_ptr<T> MakeService(AffinityData affinityData, Args&&... args)
 		{
 			std::wstringstream wss;
 
-			auto i = m_services.find(threadId);
+			auto i = m_services.find(affinityData.this_thread);
 			if (i == m_services.end())
 			{
 				ServicesMap sm = {};
 
-				auto p = std::make_unique<T>(threadId, std::forward<Args>(args)...);
+				auto p = std::make_unique<T>(affinityData, std::forward<Args>(args)...);
 				auto o = reinterpret_cast<Object>(p.get());
 				auto t = Type(typeid(T));
 
@@ -69,7 +75,7 @@ namespace ClayEngine
 				WriteLine(wss.str());
 
 				sm.emplace(t, o);
-				m_services.emplace(threadId, sm);
+				m_services.emplace(affinityData.this_thread, sm);
 				return std::move(p);
 			}
 			else
@@ -79,7 +85,7 @@ namespace ClayEngine
 				auto it = s->find(Type(typeid(T)));
 				if (it == s->end())
 				{
-					auto p = std::make_unique<T>(threadId, std::forward<Args>(args)...);
+					auto p = std::make_unique<T>(affinityData, std::forward<Args>(args)...);
 					auto o = reinterpret_cast<Object>(p.get());
 					auto t = Type(typeid(T));
 
@@ -101,11 +107,11 @@ namespace ClayEngine
 		}
 
 		template<typename T, typename... Args>
-		static std::unique_ptr<T> MakeDxService(Affinity threadId, Args&&... args)
+		static std::unique_ptr<T> MakeDxService(AffinityData threadId, Args&&... args)
 		{
 			std::wstringstream wss;
 
-			auto i = m_services.find(threadId);
+			auto i = m_services.find(threadId.this_thread);
 			if (i != m_services.end())
 			{
 				auto s = &i->second;

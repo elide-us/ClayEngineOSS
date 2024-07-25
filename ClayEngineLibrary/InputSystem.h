@@ -455,7 +455,7 @@ namespace ClayEngine
 	/// </summary>
 	class InputSystem
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity;
 
 		MousePtr m_mouse = nullptr;
 		Tracker m_tracker = {};
@@ -470,7 +470,7 @@ namespace ClayEngine
 		bool m_alt_pressed = false;
 
 	public:
-		InputSystem(Affinity affinityId);
+		InputSystem(AffinityData affinityId);
 		~InputSystem();
 
 		void OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam);
@@ -499,15 +499,17 @@ namespace ClayEngine
 	using InputSystemPtr = std::unique_ptr<InputSystem>;
 	using InputSystemRaw = InputSystem*;
 
+	// Is not used anywhere currently, may or may not work, consider options for AffinityData handling in all classes
 	class InputSystemExtension
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity;
+
 	protected:
 		InputSystemRaw m_is = nullptr;
 	public:
 		InputSystemExtension()
 		{
-			m_is = Services::GetService<InputSystem>(m_affinity);
+			m_is = Services::GetService<InputSystem>(m_affinity.this_thread);
 		}
 		~InputSystemExtension()
 		{
@@ -515,6 +517,7 @@ namespace ClayEngine
 		}
 	};
 
+	// Hacked in affinity data to make it work, but this class probably won't actually work if you try to use it
 	class InputHandler
 	{
 		static inline bool m_caps_lock = false;
@@ -530,8 +533,10 @@ namespace ClayEngine
 	public:
 		static void Initialize()
 		{
+			auto _ad = AffinityData{ std::this_thread::get_id(), std::this_thread::get_id() };
+
 			m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
-			m_input = Services::MakeService<InputSystem>(std::this_thread::get_id()); // Happens during static init, so this never hits the stdout. Future versions should hit the log file...
+			m_input = Services::MakeService<InputSystem>(_ad); // Happens during static init, so this never hits the stdout. Future versions should hit the log file...
 			m_input_buffer = m_input->GetInputBuffer();
 			m_scrollback_buffer = m_input->GetRCBuffer();
 			m_display_buffer = m_input->GetDisplayBuffer();

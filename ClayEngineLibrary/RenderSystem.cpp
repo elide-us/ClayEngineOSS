@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-ClayEngine::RenderSystem::RenderSystem(Affinity affinityId)
+ClayEngine::RenderSystem::RenderSystem(AffinityData affinityId)
 	: m_affinity(affinityId)
 {
 	StartRenderSystem();
@@ -19,7 +19,7 @@ ClayEngine::RenderSystem::~RenderSystem()
 void ClayEngine::RenderSystem::StartRenderSystem()
 {
 	// This is the graphics device resource, context and object factory
-	m_resources = Services::MakeService<DX11Resources>(m_affinity, 0); // D3D11_CREATE_DEVICE_BGRA_SUPPORT
+	m_resources = Services::MakeService<DX11Resources>(m_affinity); // D3D11_CREATE_DEVICE_BGRA_SUPPORT
 
 	// This SpriteBatch can be used for 2D games and User Interface elements
 	m_spritebatch = Services::MakeDxService<SpriteBatch>(m_affinity, m_resources->GetContext());
@@ -32,21 +32,21 @@ void ClayEngine::RenderSystem::StopRenderSystem()
 {
 	if (m_primitive)
 	{
-		Services::RemoveService<PrimitivePipeline>(m_affinity);
+		Services::RemoveService<PrimitivePipeline>(m_affinity.this_thread);
 		m_primitive.reset();
 		m_primitive = nullptr;
 	}
 
 	if (m_spritebatch)
 	{
-		Services::RemoveService<SpriteBatch>(m_affinity);
+		Services::RemoveService<SpriteBatch>(m_affinity.this_thread);
 		m_spritebatch.reset();
 		m_spritebatch = nullptr;
 	}
 
 	if (m_resources)
 	{
-		Services::RemoveService<DX11Resources>(m_affinity);
+		Services::RemoveService<DX11Resources>(m_affinity.this_thread);
 		m_resources.reset();
 		m_resources = nullptr;
 	}
@@ -75,8 +75,8 @@ void ClayEngine::RenderSystem::Clear()
 
 	ctx->OMSetRenderTargets(1, m_resources->GetRTVPtr().GetAddressOf(), m_resources->GetDSV());
 
-	auto w = float(Services::GetService<WindowSystem>(m_affinity)->GetWindowWidth());
-	auto h = float(Services::GetService<WindowSystem>(m_affinity)->GetWindowHeight());
+	auto w = float(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowWidth());
+	auto h = float(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowHeight());
 
 	auto viewport = CD3D11_VIEWPORT{ 0.0f, 0.0f, w, h };
 	//CD3D11_VIEWPORT viewport();

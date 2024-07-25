@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ClayEngine.h"
+#include "Services.h"
 
 #include <DirectXMath.h>
 #include <exception>
@@ -9,6 +10,8 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 {
 	if (!DirectX::XMVerifyCPUSupport()) throw std::exception("ClayEngine CRITICAL: CPU Unsupported");
 	if (FAILED(CoInitializeEx(nullptr, COINITBASE_MULTITHREADED))) throw std::exception("ClayEngine CRITICAL: Failed to Initialize COM");
+
+	m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
 
 #ifdef _DEBUG
 	if (AllocConsole())
@@ -24,6 +27,8 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 
 	// Intentionally hard-coded, this is your default startup file
 	m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_json);
+
+	m_device = Services::MakeService<DX11DeviceFactory>(m_affinity_data);
 }
 
 ClayEngine::ClayEngine::~ClayEngine()
@@ -47,7 +52,7 @@ void ClayEngine::ClayEngine::Run()
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
 			
-			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_cmdShow, m_cmdLine, ToUnicode(_class), ToUnicode(_title)));
+			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
 		}
 
 		if (_type == "server")

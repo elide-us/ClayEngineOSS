@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "ClientCore.h"
+#include "ClayEngineClient.h"
 
 #include "WindowSystem.h"
 #include "InputSystem.h"
@@ -22,10 +22,11 @@ namespace ClayEngine
 #pragma endregion
 
 #pragma region ClayEngineClient Definitions
-ClayEngine::ClayEngineClient::ClayEngineClient(HINSTANCE hInstance, UINT nCmdShow, LPWSTR nCmdLine, Unicode className, Unicode windowName)
-    : m_instance_handle(hInstance), m_show_flags(nCmdShow), m_cmd_line(nCmdLine)
+ClayEngine::ClayEngineClient::ClayEngineClient(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName)
+    : m_instance_handle(hInstance)
 {
-    m_thread = std::thread{ ClayEngineClientEntryPoint(), hInstance, nCmdShow, className, windowName, std::move(m_promise.get_future()), this };
+    m_affinity_data.root_thread = pRoot;
+    m_thread = std::thread{ ClayEngineClientEntryPoint(), hInstance, m_show_flags, className, windowName, std::move(m_promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineClient::~ClayEngineClient()
@@ -34,22 +35,22 @@ ClayEngine::ClayEngineClient::~ClayEngineClient()
     m_thread.join();
 }
 
-void ClayEngine::ClayEngineClient::SetAffinity(Affinity affinity)
+void ClayEngine::ClayEngineClient::SetContextAffinity(Affinity affinity)
 {
-	m_affinity = affinity;
+	m_affinity_data.this_thread = affinity;
 }
 
-const ClayEngine::Affinity& ClayEngine::ClayEngineClient::GetAffinity() const
+const ClayEngine::AffinityData& ClayEngine::ClayEngineClient::GetAffinityData() const
 {
-    return m_affinity;
+	return m_affinity_data;
 }
 #pragma endregion
 
 #pragma region ClayEngineClientEntryPoint Definition
 int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, Future future, ClayEngineClientRaw context)
 {
-    auto _affinity = std::this_thread::get_id();
-    context->SetAffinity(_affinity);
+    context->SetContextAffinity(std::this_thread::get_id());
+    auto _affinity = context->GetAffinityData();
 
     // The following services need to be instantiated for a basic client:
     // WindowSystem, InputSystem, TimingSystem, ContentSystem, RenderSystem
@@ -61,7 +62,7 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
     auto _input = Services::MakeService<InputSystem>(_affinity);
 
-    auto _test_dx11resources = std::make_unique<DX11Resources>(_affinity, 0);
+    auto _dx11resources = std::make_unique<DX11Resources>(_affinity);
 
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);

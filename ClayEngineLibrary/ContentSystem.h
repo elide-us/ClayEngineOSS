@@ -20,7 +20,7 @@ namespace ClayEngine
     /// </summary>
     class ContentSystem
     {
-        Affinity m_affinity;
+        AffinityData m_affinity;
 
         JsonFilePtr m_json = nullptr;
 
@@ -28,7 +28,7 @@ namespace ClayEngine
         FontResourcesPtr m_fonts = nullptr;
 
     public:
-        ContentSystem(Affinity affinityId);
+        ContentSystem(AffinityData affinityId);
         ~ContentSystem();
 
         void StartContentSystem();
