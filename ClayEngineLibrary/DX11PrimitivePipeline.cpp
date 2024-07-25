@@ -4,7 +4,7 @@
 #include "Services.h"
 
 #pragma region Basic Vertex Position Color (VPC) Primitive Pipeline
-ClayEngine::PrimitivePipeline::PrimitivePipeline(Affinity affinityId, ContextRaw context)
+ClayEngine::PrimitivePipeline::PrimitivePipeline(AffinityData affinityId, ContextRaw context)
 	: m_affinity(affinityId)
 {
 	m_batch = std::make_unique<PrimitiveBatchVPC>(context);

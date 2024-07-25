@@ -18,18 +18,19 @@ namespace ClayEngine
     class ClayEngineClient
         : public ThreadExtension
     {
-        HINSTANCE m_instance_handle = NULL;
+        HINSTANCE m_instance_handle = {};
 		UINT m_show_flags = SW_SHOWDEFAULT;
-        LPWSTR m_cmd_line = NULL;
 
-        Affinity m_affinity;
+        //Affinity m_affinity;
+        AffinityData m_affinity_data;
 
     public:
-        ClayEngineClient(HINSTANCE hInstance, UINT nCmdShow, LPWSTR nCmdLine, Unicode className, Unicode windowName);
+        ClayEngineClient(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName);
         ~ClayEngineClient();
 
-        void SetAffinity(Affinity affinity);
-        const Affinity& GetAffinity() const;
+        void SetContextAffinity(Affinity affinity);
+        const AffinityData& GetAffinityData() const;
+
     };
     using ClayEngineClientPtr = std::unique_ptr<ClayEngineClient>;
     using ClayEngineClientRaw = ClayEngineClient*;

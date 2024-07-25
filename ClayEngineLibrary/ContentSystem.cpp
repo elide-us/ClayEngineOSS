@@ -3,7 +3,7 @@
 
 #include "DX11Resources.h"
 
-ClayEngine::ContentSystem::ContentSystem(Affinity affinityId)
+ClayEngine::ContentSystem::ContentSystem(AffinityData affinityId)
     : m_affinity(affinityId)
 {
     StartContentSystem();
@@ -16,7 +16,7 @@ ClayEngine::ContentSystem::~ContentSystem()
 
 void ClayEngine::ContentSystem::StartContentSystem()
 {
-    auto device = Services::GetService<DX11Resources>(m_affinity)->GetDevice();
+    auto device = Services::GetService<DX11Resources>(m_affinity.this_thread)->GetDevice();
 
     m_textures = Services::MakeService<TextureResources>(m_affinity);
     m_textures->SetDevice(device);
@@ -38,14 +38,14 @@ void ClayEngine::ContentSystem::StopContentSystem()
 {
     if (m_fonts)
     {
-        Services::RemoveService<FontResources>(m_affinity);
+        Services::RemoveService<FontResources>(m_affinity.this_thread);
         m_fonts.reset();
         m_fonts = nullptr;
     }
 
     if (m_textures)
     {
-        Services::RemoveService<TextureResources>(m_affinity);
+        Services::RemoveService<TextureResources>(m_affinity.this_thread);
         m_textures.reset();
         m_textures = nullptr;
     }

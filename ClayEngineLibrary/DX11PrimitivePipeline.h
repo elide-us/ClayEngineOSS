@@ -16,7 +16,7 @@ namespace ClayEngine
 {
 	class PrimitivePipeline
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity;
 
 		using PrimitiveBatchVPC = DirectX::PrimitiveBatch<DirectX::VertexPositionColor>;
 		using PrimitiveBatchVPCPtr = ::std::unique_ptr<PrimitiveBatchVPC>;
@@ -24,7 +24,7 @@ namespace ClayEngine
 		PrimitiveBatchVPCPtr m_batch = nullptr;
 
 	public:
-		PrimitivePipeline(Affinity affinityId, ContextRaw context);
+		PrimitivePipeline(AffinityData affinityId, ContextRaw context);
 		~PrimitivePipeline();
 
 		// Pass a reference to a vertex buffer object that you want this pipeline to draw

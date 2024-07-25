@@ -5,7 +5,7 @@
 
 using namespace DirectX;
 
-ClayEngine::InputSystem::InputSystem(ClayEngine::Affinity affinityId)
+ClayEngine::InputSystem::InputSystem(AffinityData affinityId)
 	: m_affinity(affinityId)
 {
 	m_input_buffer = std::make_unique<InputBuffer>();
@@ -15,7 +15,7 @@ ClayEngine::InputSystem::InputSystem(ClayEngine::Affinity affinityId)
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
 	m_mouse = std::make_unique<Mouse>();
-	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity)->GetWindowHandle());
+	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowHandle());
 }
 
 ClayEngine::InputSystem::~InputSystem()

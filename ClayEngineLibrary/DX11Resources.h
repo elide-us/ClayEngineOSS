@@ -10,6 +10,8 @@
 #include "Strings.h"
 #include "Services.h"
 
+#include "DX11DeviceFactory.h"
+
 using Microsoft::WRL::ComPtr;
 
 namespace ClayEngine
@@ -28,22 +30,6 @@ namespace ClayEngine
 	using RenderTargetViewRaw = ID3D11RenderTargetView*;
 	using DepthStencilViewPtr = ComPtr<ID3D11DepthStencilView>;
 	using DepthStencilViewRaw = ID3D11DepthStencilView*;
-
-	// Used by the swap chain SwapEffect property
-	constexpr UINT c_flip_present = 0x1;
-	constexpr UINT c_allow_tearing = 0x2;
-	constexpr UINT c_enable_hdr = 0x4;
-
-	constexpr D3D_FEATURE_LEVEL c_feature_levels[] = {
-		D3D_FEATURE_LEVEL_11_1,
-		D3D_FEATURE_LEVEL_11_0,
-		D3D_FEATURE_LEVEL_10_1,
-		D3D_FEATURE_LEVEL_10_0,
-		D3D_FEATURE_LEVEL_9_3,
-		D3D_FEATURE_LEVEL_9_2,
-		D3D_FEATURE_LEVEL_9_1
-	};
-	constexpr auto c_feature_level_count = __crt_countof(c_feature_levels);
 
 	inline DXGI_FORMAT NoSRGB(DXGI_FORMAT format) noexcept
 	{
@@ -66,17 +52,10 @@ namespace ClayEngine
 	/// </summary>
 	class DX11Resources
 	{
-		Affinity m_affinity;
+		AffinityData m_affinity_data;
 
-		bool m_sdk_layers = false;
-		unsigned int m_device_options = c_flip_present | c_allow_tearing | c_enable_hdr;
-
-		UINT m_creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
-
-		D3D_FEATURE_LEVEL m_min_feature_level = D3D_FEATURE_LEVEL_10_0;
 		D3D_FEATURE_LEVEL m_feature_level = {};
 
-		FactoryPtr m_factory = nullptr;
 		DevicePtr m_device = nullptr;
 		ContextPtr m_device_context = nullptr;
 		SwapChainPtr m_swapchain = nullptr;
@@ -99,7 +78,7 @@ namespace ClayEngine
 		DepthStencilViewPtr m_depthstencil = nullptr;
 
 	public:
-		DX11Resources(Affinity affinityId, UINT flags);
+		DX11Resources(AffinityData affinityData);
 		~DX11Resources();
 
 		void StartResources();
