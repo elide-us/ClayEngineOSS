@@ -5,8 +5,8 @@
 
 using namespace DirectX;
 
-ClayEngine::InputSystem::InputSystem(AffinityData affinityId)
-	: m_affinity(affinityId)
+ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
+	: m_affinity_data(affinityData)
 {
 	m_input_buffer = std::make_unique<InputBuffer>();
 	m_scrollback_buffer = std::make_unique<ScrollbackBuffer>();
@@ -15,7 +15,13 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityId)
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
 	m_mouse = std::make_unique<Mouse>();
-	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowHandle());
+	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
+
+	auto _win = Services::GetService<WindowSystem>(m_affinity_data.this_thread);
+
+	_win->AddOnCharCallback([&](WPARAM wParam, LPARAM lParam) { OnChar(wParam, lParam); });
+	
+
 }
 
 ClayEngine::InputSystem::~InputSystem()
@@ -194,7 +200,7 @@ void ClayEngine::InputSystem::OnChar(WPARAM wParam, LPARAM lParam)
 	}
 } // Processes character input (dependent on input state)
 
-ClayEngine::Unicode ClayEngine::InputSystem::GetBuffer()
+auto ClayEngine::InputSystem::GetBuffer()
 {
 	return m_input_buffer->GetString();
 }

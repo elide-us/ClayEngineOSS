@@ -49,9 +49,9 @@ namespace ClayEngine
 
 		bool m_sdk_layers = false;
 
-		const UINT c_flip_present = 0x1;
-		const UINT c_allow_tearing = 0x2;
-		const UINT c_enable_hdr = 0x4;
+		//const UINT c_flip_present = 0x1;
+		//const UINT c_allow_tearing = 0x2;
+		//const UINT c_enable_hdr = 0x4;
 		
 		UINT m_device_options = c_flip_present | c_allow_tearing | c_enable_hdr;
 		UINT m_creation_flags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;

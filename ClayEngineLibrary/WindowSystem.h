@@ -14,6 +14,9 @@
 
 namespace ClayEngine
 {
+	using Message = std::function<void(WPARAM, LPARAM)>;
+	using Messages = std::vector<Message>;
+
 	using Function = std::function<void()>;
 	using Functions = std::vector<Function>;
 
@@ -47,7 +50,7 @@ namespace ClayEngine
 		Functions s_ondeactivated = {};
 		Functions s_onsuspended = {};
 		Functions s_onresumed = {};
-		Functions s_onchar = {};
+		Messages s_onchar = {};
 
 	public:
 		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
@@ -166,13 +169,13 @@ namespace ClayEngine
 			for (auto& element : s_onchanged) { element(); }
 		}
 
-		void AddOnCharCallback(Function fn)
+		void AddOnCharCallback(Message fn)
 		{
 			s_onchar.push_back(fn);
 		}
 		void OnChar(WPARAM wParam, LPARAM lParam)
 		{
-			for (auto& element : s_onchar) { element(); }
+			for (auto& element : s_onchar) { element(wParam, lParam); }
 		}
 		#pragma endregion
 	};

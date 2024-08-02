@@ -3,8 +3,8 @@
 
 #include "DX11Resources.h"
 
-ClayEngine::ContentSystem::ContentSystem(AffinityData affinityId)
-    : m_affinity(affinityId)
+ClayEngine::ContentSystem::ContentSystem(AffinityData affinityData)
+    : m_affinity_data(affinityData)
 {
     StartContentSystem();
 }
@@ -16,12 +16,12 @@ ClayEngine::ContentSystem::~ContentSystem()
 
 void ClayEngine::ContentSystem::StartContentSystem()
 {
-    auto device = Services::GetService<DX11Resources>(m_affinity.this_thread)->GetDevice();
+    auto device = Services::GetService<DX11Resources>(m_affinity_data.this_thread)->GetDevice();
 
-    m_textures = Services::MakeService<TextureResources>(m_affinity);
+    m_textures = Services::MakeService<TextureResources>(m_affinity_data, true);
     m_textures->SetDevice(device);
 
-    m_fonts = Services::MakeService<FontResources>(m_affinity);
+    m_fonts = Services::MakeService<FontResources>(m_affinity_data, true);
     m_fonts->SetDevice(device);
 
     m_json = std::make_unique<JsonFile>(c_content_filename);
@@ -38,14 +38,14 @@ void ClayEngine::ContentSystem::StopContentSystem()
 {
     if (m_fonts)
     {
-        Services::RemoveService<FontResources>(m_affinity.this_thread);
+        Services::RemoveService<FontResources>(m_affinity_data.this_thread);
         m_fonts.reset();
         m_fonts = nullptr;
     }
 
     if (m_textures)
     {
-        Services::RemoveService<TextureResources>(m_affinity.this_thread);
+        Services::RemoveService<TextureResources>(m_affinity_data.this_thread);
         m_textures.reset();
         m_textures = nullptr;
     }

@@ -5,8 +5,8 @@ using namespace DirectX;
 
 #include "WICTextureLoader.h"
 
-ClayEngine::TextureResources::TextureResources(AffinityData affinityId)
-	: m_affinity(affinityId)
+ClayEngine::TextureResources::TextureResources(AffinityData affinityData)
+	: m_affinity_data(affinityData)
 {
 
 }
@@ -68,8 +68,8 @@ void ClayEngine::TextureResources::ClearTextures()
 	WriteLine("ClearTextures INFO: Texture map cleared.");
 }
 
-ClayEngine::FontResources::FontResources(AffinityData affinityId)
-	: m_affinity(affinityId)
+ClayEngine::FontResources::FontResources(AffinityData affinityData)
+	: m_affinity_data(affinityData)
 {
 
 }

@@ -32,20 +32,10 @@ namespace ClayEngine
 
 		JsonFilePtr m_bootstrap = {}; // Loads clayengine.json
 
-		AffinityData m_affinity_data = {};
-		DX11DeviceFactoryPtr m_device = nullptr;
-
-		// These maps contain the kernels for each client and server running within this process
-		// There should typically only be one Server running to minimize resource usage since 
-		// this process runs a GUI. The headless server should be used for most other processes
-		// such as authentication, egress routing, database connectors, and the like. It should be
-		// possible to run all of these services on one headless node, and connect to it with the
-		// GUI server to view and monitor the game world status. It is strongly recommended to
-		// run the game world server on its own dedicated node.
+		AffinityData m_affinity_data = {}; // Universal scope (parent of all) affinity data. this_thread = root_thread
+		DX11DeviceFactoryPtr m_device = nullptr; // Universal scope hardware device factory, includes feature interrogation
 
 		ClientMap m_clients = {};
-		//ServerMap m_servers = {};
-		//HeadlessMap m_headless = {};
 
 	public:
 		ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale);
