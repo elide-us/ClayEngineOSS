@@ -20,8 +20,8 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 	auto _win = Services::GetService<WindowSystem>(m_affinity_data.this_thread);
 
 	_win->AddOnCharCallback([&](WPARAM wParam, LPARAM lParam) { OnChar(wParam, lParam); });
-	
-
+	_win->AddOnKeyDownCallback([&](WPARAM wParam, LPARAM lParam) { OnKeyDown(wParam, lParam); });
+	_win->AddOnKeyUpCallback([&](WPARAM wParam, LPARAM lParam) { OnKeyUp(wParam, lParam); });
 }
 
 ClayEngine::InputSystem::~InputSystem()

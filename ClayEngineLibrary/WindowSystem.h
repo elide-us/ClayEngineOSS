@@ -50,7 +50,10 @@ namespace ClayEngine
 		Functions s_ondeactivated = {};
 		Functions s_onsuspended = {};
 		Functions s_onresumed = {};
-		Messages s_onchar = {};
+		
+		Messages m_on_char = {};
+		Messages m_on_keydown = {};
+		Messages m_on_keyup = {};
 
 	public:
 		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
@@ -126,41 +129,21 @@ namespace ClayEngine
 		#pragma endregion
 
 		#pragma region Window event callback handlers
-		void AddOnActivatedCallback(Function fn)
-		{
-			s_onactivated.push_back(fn);
-		}
 		void OnActivated()
 		{
 			for (auto& element : s_onactivated) { element(); }
-		}
-		void AddOnResumingCallback(Function fn)
-		{
-			s_onresumed.push_back(fn);
 		}
 		void OnResuming()
 		{
 			for (auto& element : s_onresumed) { element(); }
 		}
-		void AddOnSuspendedCallback(Function fn)
-		{
-			s_onsuspended.push_back(fn);
-		}
 		void OnSuspending()
 		{
 			for (auto& element : s_onsuspended) { element(); }
 		}
-		void AddOnDeactivatedCallback(Function fn)
-		{
-			s_ondeactivated.push_back(fn);
-		}
 		void OnDeactivated()
 		{
 			for (auto& element : s_ondeactivated) { element(); }
-		}
-		void AddOnChangedCallback(Function fn)
-		{
-			s_onchanged.push_back(fn);
 		}
 		void OnChanged()
 		{
@@ -171,11 +154,27 @@ namespace ClayEngine
 
 		void AddOnCharCallback(Message fn)
 		{
-			s_onchar.push_back(fn);
+			m_on_char.push_back(fn);
 		}
 		void OnChar(WPARAM wParam, LPARAM lParam)
 		{
-			for (auto& element : s_onchar) { element(wParam, lParam); }
+			for (auto& element : m_on_char) { element(wParam, lParam); }
+		}
+		void AddOnKeyDownCallback(Message fn)
+		{
+			m_on_keydown.push_back(fn);
+		}
+		void OnKeyDown(WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_keydown) { element(wParam, lParam); }
+		}
+		void AddOnKeyUpCallback(Message fn)
+		{
+			m_on_keyup.push_back(fn);
+		}
+		void OnKeyUp(WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_keyup) { element(wParam, lParam); }
 		}
 		#pragma endregion
 	};
