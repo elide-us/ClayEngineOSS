@@ -5,8 +5,8 @@
 
 using namespace DirectX;
 
-ClayEngine::RenderSystem::RenderSystem(AffinityData affinityId)
-	: m_affinity(affinityId)
+ClayEngine::RenderSystem::RenderSystem(AffinityData affinityData)
+	: m_affinity_data(affinityData)
 {
 	StartRenderSystem();
 }
@@ -19,34 +19,34 @@ ClayEngine::RenderSystem::~RenderSystem()
 void ClayEngine::RenderSystem::StartRenderSystem()
 {
 	// This is the graphics device resource, context and object factory
-	m_resources = Services::MakeService<DX11Resources>(m_affinity); // D3D11_CREATE_DEVICE_BGRA_SUPPORT
+	m_resources = Services::MakeService<DX11Resources>(m_affinity_data);
 
 	// This SpriteBatch can be used for 2D games and User Interface elements
-	m_spritebatch = Services::MakeDxService<SpriteBatch>(m_affinity, m_resources->GetContext());
+	m_spritebatch = Services::MakeService<SpriteBatch>(m_affinity_data, m_resources->GetContext());
 
 	// This primitive pipeline is designed to render basic 3D vertex buffer objects
-	m_primitive = Services::MakeService<PrimitivePipeline>(m_affinity, m_resources->GetContext());
+	m_primitive = Services::MakeService<PrimitivePipeline>(m_affinity_data, m_resources->GetContext());
 }
 
 void ClayEngine::RenderSystem::StopRenderSystem()
 {
 	if (m_primitive)
 	{
-		Services::RemoveService<PrimitivePipeline>(m_affinity.this_thread);
+		Services::RemoveService<PrimitivePipeline>(m_affinity_data.this_thread);
 		m_primitive.reset();
 		m_primitive = nullptr;
 	}
 
 	if (m_spritebatch)
 	{
-		Services::RemoveService<SpriteBatch>(m_affinity.this_thread);
+		Services::RemoveService<SpriteBatch>(m_affinity_data.this_thread);
 		m_spritebatch.reset();
 		m_spritebatch = nullptr;
 	}
 
 	if (m_resources)
 	{
-		Services::RemoveService<DX11Resources>(m_affinity.this_thread);
+		Services::RemoveService<DX11Resources>(m_affinity_data.this_thread);
 		m_resources.reset();
 		m_resources = nullptr;
 	}
@@ -75,8 +75,8 @@ void ClayEngine::RenderSystem::Clear()
 
 	ctx->OMSetRenderTargets(1, m_resources->GetRTVPtr().GetAddressOf(), m_resources->GetDSV());
 
-	auto w = float(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowWidth());
-	auto h = float(Services::GetService<WindowSystem>(m_affinity.this_thread)->GetWindowHeight());
+	auto w = float(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowWidth());
+	auto h = float(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHeight());
 
 	auto viewport = CD3D11_VIEWPORT{ 0.0f, 0.0f, w, h };
 	//CD3D11_VIEWPORT viewport();

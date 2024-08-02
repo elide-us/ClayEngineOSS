@@ -1,24 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="DX11PrimitivePipeline.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Resources.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="DX11Textures.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="ContentSystem.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderSystem.cpp">
-      <Filter>Private\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Voxel.cpp">
-      <Filter>Private\SimpleMath</Filter>
-    </ClCompile>
     <ClCompile Include="Storage.cpp">
       <Filter>Private\Utility</Filter>
     </ClCompile>
@@ -29,30 +11,15 @@
     <ClCompile Include="ClayEngineClient.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="InputSystem.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="WindowSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
     <ClCompile Include="ClayEngine.cpp" />
+    <ClCompile Include="InputSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DX11PrimitivePipeline.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DX11Resources.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="DX11Textures.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderSystem.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ContentSystem.h">
-      <Filter>Public\Graphics</Filter>
-    </ClInclude>
     <ClInclude Include="Services.h">
       <Filter>Public\Utility</Filter>
     </ClInclude>
@@ -61,12 +28,6 @@
     </ClInclude>
     <ClInclude Include="Strings.h">
       <Filter>Public\Utility</Filter>
-    </ClInclude>
-    <ClInclude Include="Random.h">
-      <Filter>Public\SimpleMath</Filter>
-    </ClInclude>
-    <ClInclude Include="Voxel.h">
-      <Filter>Public\SimpleMath</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
       <Filter>Public\Utility</Filter>
@@ -78,13 +39,13 @@
     <ClInclude Include="ClayEngineClient.h">
       <Filter>Public\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="InputSystem.h">
-      <Filter>Public\Systems</Filter>
-    </ClInclude>
     <ClInclude Include="WindowSystem.h">
       <Filter>Public\Systems</Filter>
     </ClInclude>
     <ClInclude Include="ClayEngine.h" />
+    <ClInclude Include="InputSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Private">

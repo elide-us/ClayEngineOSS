@@ -55,13 +55,13 @@ namespace ClayEngine
 	class TextureResources
 		: public DX11DeviceInitExtension
 	{
-		AffinityData m_affinity;
+		AffinityData m_affinity_data;
 
 		using TexturesMap = std::map<String, TextureComPtr>;
 		TexturesMap m_textures = {};
 
 	public:
-		TextureResources(AffinityData affinityId);
+		TextureResources(AffinityData affinityData);
 		~TextureResources() = default;
 
 		void AddTexture(String texture);
@@ -75,13 +75,13 @@ namespace ClayEngine
 	class FontResources
 		: public DX11DeviceInitExtension
 	{
-		AffinityData m_affinity;
+		AffinityData m_affinity_data;
 
 		using FontsMap = std::map<String, SpriteFontPtr>;
 		FontsMap m_fonts = {};
 
 	public:
-		FontResources(AffinityData affinityId);
+		FontResources(AffinityData affinityData);
 		~FontResources() = default;
 
 		void AddFont(String font);

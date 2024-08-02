@@ -20,7 +20,7 @@ namespace ClayEngine
     /// </summary>
     class ContentSystem
     {
-        AffinityData m_affinity;
+        AffinityData m_affinity_data;
 
         JsonFilePtr m_json = nullptr;
 
@@ -28,7 +28,7 @@ namespace ClayEngine
         FontResourcesPtr m_fonts = nullptr;
 
     public:
-        ContentSystem(AffinityData affinityId);
+        ContentSystem(AffinityData affinityData);
         ~ContentSystem();
 
         void StartContentSystem();
@@ -46,18 +46,18 @@ namespace ClayEngine
     using ContentSystemRaw = ContentSystem*;
 
     //TODO: Another instance of possible issues due to Affinity
-    class ContentSystemExtension
-    {
-    protected:
-        ContentSystemRaw m_cs = nullptr;
-    public:
-        ContentSystemExtension()
-        {
-            m_cs = Services::GetService<ContentSystem>(std::this_thread::get_id());
-        }
-        ~ContentSystemExtension()
-        {
-            m_cs = nullptr;
-        }
-    };
+    //class ContentSystemExtension
+    //{
+    //protected:
+    //    ContentSystemRaw m_cs = nullptr;
+    //public:
+    //    ContentSystemExtension()
+    //    {
+    //        m_cs = Services::GetService<ContentSystem>(std::this_thread::get_id());
+    //    }
+    //    ~ContentSystemExtension()
+    //    {
+    //        m_cs = nullptr;
+    //    }
+    //};
 }

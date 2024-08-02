@@ -237,7 +237,18 @@ void ClayEngine::DX11Resources::StartPipeline()
 		_hr = _factory->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
 		if (FAILED(_hr)) throw std::exception("MakeWindowAssociation");
 
+		// Everything up to Swap Chain done, now need RTV and DSV
 
+		// UpdateColorSpace()
+
+		// _swap_chain -> GetBuffer
+
+		// RTV Desc
+
+			// If we got a format? (not UNKNOWN)
+			// Create Depth Stencil and View
+
+		// Set Viewport
 	}
 }
 

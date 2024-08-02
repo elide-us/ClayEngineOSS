@@ -107,11 +107,11 @@ namespace ClayEngine
 		}
 
 		template<typename T, typename... Args>
-		static std::unique_ptr<T> MakeDxService(AffinityData threadId, Args&&... args)
+		static std::unique_ptr<T> MakeDxService(AffinityData affinityData, Args&&... args)
 		{
 			std::wstringstream wss;
 
-			auto i = m_services.find(threadId.this_thread);
+			auto i = m_services.find(affinityData.this_thread);
 			if (i != m_services.end())
 			{
 				auto s = &i->second;

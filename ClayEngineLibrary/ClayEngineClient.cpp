@@ -4,8 +4,8 @@
 #include "WindowSystem.h"
 #include "InputSystem.h"
 //#include "TimingSystem.h"
-#include "ContentSystem.h"
-#include "RenderSystem.h"
+//#include "ContentSystem.h"
+//#include "RenderSystem.h"
 //#include "NetworkSystem.h"
 
 #pragma region ClayEngineClientEntryPoint Declaration
@@ -52,17 +52,12 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     context->SetContextAffinity(std::this_thread::get_id());
     auto _affinity = context->GetAffinityData();
 
-    // The following services need to be instantiated for a basic client:
-    // WindowSystem, InputSystem, TimingSystem, ContentSystem, RenderSystem
-
     //TODO: See older code for client state management logic which should go here
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
     
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
     auto _input = Services::MakeService<InputSystem>(_affinity);
-
-    auto _dx11resources = std::make_unique<DX11Resources>(_affinity);
 
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);

@@ -14,19 +14,17 @@
 
 #include "SpriteBatch.h"
 
-using namespace DirectX;
-
 namespace ClayEngine
 {
-	using SpriteBatchPtr = std::unique_ptr<SpriteBatch>;
-	using SpriteBatchRaw = SpriteBatch*;
+	using SpriteBatchPtr = std::unique_ptr<DirectX::SpriteBatch>;
+	using SpriteBatchRaw = DirectX::SpriteBatch*;
 
 	/// <summary>
 	/// API entry point for the graphical pipeline and GPU resources
 	/// </summary>
 	class RenderSystem
 	{
-		AffinityData m_affinity;
+		AffinityData m_affinity_data;
 
 		DX11ResourcesPtr m_resources = nullptr;
 
@@ -36,7 +34,7 @@ namespace ClayEngine
 		bool m_device_lost = true;
 
 	public:
-		RenderSystem(AffinityData affinityId);
+		RenderSystem(AffinityData affinityData);
 		~RenderSystem();
 
 		void StartRenderSystem();
@@ -56,34 +54,33 @@ namespace ClayEngine
 	using RenderSystemPtr = std::unique_ptr<RenderSystem>;
 	using RenderSystemRaw = RenderSystem*;
 
-	//TODO: More problematic Affinity extensions...
-	class RenderSystemExtension
-	{
-	protected:
-		RenderSystemRaw m_rs = nullptr;
-	public:
-		RenderSystemExtension()
-		{
-			m_rs = Services::GetService<RenderSystem>(std::this_thread::get_id());
-		}
-		~RenderSystemExtension()
-		{
-			m_rs = nullptr;
-		}
-	};
+	//class RenderSystemExtension
+	//{
+	//protected:
+	//	RenderSystemRaw m_rs = nullptr;
+	//public:
+	//	RenderSystemExtension()
+	//	{
+	//		m_rs = Services::GetService<RenderSystem>(std::this_thread::get_id());
+	//	}
+	//	~RenderSystemExtension()
+	//	{
+	//		m_rs = nullptr;
+	//	}
+	//};
 
-	class SpriteBatchExtension
-	{
-	protected:
-		SpriteBatchRaw m_spritebatch = nullptr;
-	public:
-		SpriteBatchExtension()
-		{
-			m_spritebatch = Services::GetService<SpriteBatch>(std::this_thread::get_id());
-		}
-		~SpriteBatchExtension()
-		{
-			m_spritebatch = nullptr;
-		}
-	};
+	//class SpriteBatchExtension
+	//{
+	//protected:
+	//	SpriteBatchRaw m_spritebatch = nullptr;
+	//public:
+	//	SpriteBatchExtension()
+	//	{
+	//		m_spritebatch = Services::GetService<DirectX::SpriteBatch>(m_affinity_data.this_thread);
+	//	}
+	//	~SpriteBatchExtension()
+	//	{
+	//		m_spritebatch = nullptr;
+	//	}
+	//};
 }
