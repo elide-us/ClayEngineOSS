@@ -18,13 +18,7 @@ namespace ClayEngine
 
         switch (message)
         {
-        //case WM_CREATE:
-        //    if (lParam)
-        //    {
-        //        auto params = reinterpret_cast<LPCREATESTRUCTW>(lParam);
-        //        SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(params->lpCreateParams));
-        //    }
-        //    break;
+
         case WM_MENUCHAR: // Supress the menu
             return MAKELRESULT(0, MNC_CLOSE);
         case WM_PAINT:
@@ -44,9 +38,11 @@ namespace ClayEngine
                 info->ptMinTrackSize.y = c_min_window_height;
             }
             break;
+        case WM_ACTIVATE:
         case WM_ACTIVATEAPP:
             // These messages get sent to all windows in the process on cerntain events, we'll
             // need to make sure we are only procesing the message for windows that are relevant
+            _ctx->OnMouesMessage(message, wParam, lParam);
             if (wParam)
             {
                 _ctx->OnActivated();
@@ -117,30 +113,37 @@ namespace ClayEngine
         case WM_CHAR:
             _ctx->OnChar(wParam, lParam);
             break;
+        
         case WM_DESTROY:
             PostQuitMessage(0);
+            break;
+        case WM_INPUT:
+        case WM_MOUSEMOVE:
+        case WM_LBUTTONDOWN:
+        case WM_LBUTTONUP:
+        case WM_RBUTTONDOWN:
+        case WM_RBUTTONUP:
+        case WM_MBUTTONDOWN:
+        case WM_MBUTTONUP:
+        case WM_MOUSEWHEEL:
+        case WM_XBUTTONDOWN:
+        case WM_XBUTTONUP:
+        case WM_MOUSEHOVER:
+            _ctx->OnMouesMessage(message, wParam, lParam);
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
         }
-
         return 0;
 
 #pragma region Older reference code
-        //	case WM_INPUT:
-        //	case WM_MOUSEMOVE:
-        //	case WM_LBUTTONDOWN:
-        //	case WM_LBUTTONUP:
-        //	case WM_RBUTTONDOWN:
-        //	case WM_RBUTTONUP:
-        //	case WM_MBUTTONDOWN:
-        //	case WM_MBUTTONUP:
-        //	case WM_MOUSEWHEEL:
-        //	case WM_XBUTTONDOWN:
-        //	case WM_XBUTTONUP:
-        //	case WM_MOUSEHOVER:
-        //		DirectX::Mouse::ProcessMessage(message, wParam, lParam); //if (g_input) g_input->OnMouseEvent(message, wParam, lParam);
-        //		break;
+        //case WM_CREATE:
+        //    if (lParam)
+        //    {
+        //        auto params = reinterpret_cast<LPCREATESTRUCTW>(lParam);
+        //        SetWindowLongPtrW(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(params->lpCreateParams));
+        //    }
+        //    break;
 
         //  // Implements the classic ALT+ENTER fullscreen toggle
         //  case WM_SYSKEYDOWN:

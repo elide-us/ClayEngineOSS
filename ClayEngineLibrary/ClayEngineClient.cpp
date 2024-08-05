@@ -3,9 +3,9 @@
 
 #include "WindowSystem.h"
 #include "InputSystem.h"
-#include "TimingSystem.h"
+//#include "TimingSystem.h"
 #include "ContentSystem.h"
-#include "RenderSystem.h"
+//#include "RenderSystem.h"
 //#include "NetworkSystem.h"
 
 #pragma region ClayEngineClientEntryPoint Declaration

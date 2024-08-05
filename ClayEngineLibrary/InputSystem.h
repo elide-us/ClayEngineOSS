@@ -457,8 +457,8 @@ namespace ClayEngine
 	{
 		AffinityData m_affinity_data;
 
-		MousePtr m_mouse = nullptr;
-		Tracker m_tracker = {};
+		//MousePtr m_mouse = nullptr;
+		//Tracker m_tracker = {};
 
 		InputBufferPtr m_input_buffer = nullptr;
 		ScrollbackBufferPtr m_scrollback_buffer = nullptr;
@@ -474,8 +474,8 @@ namespace ClayEngine
 		~InputSystem();
 
 		void OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam);
-		DirectX::Mouse::State GetMouseState();
-		DirectX::Mouse::ButtonStateTracker& GetButtonStateTracker();
+		//DirectX::Mouse::State GetMouseState();
+		//DirectX::Mouse::ButtonStateTracker& GetButtonStateTracker();
 
 		void OnKeyDown(WPARAM wParam, LPARAM lParam);
 		void OnKeyUp(WPARAM wParam, LPARAM lParam);

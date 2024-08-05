@@ -3,7 +3,7 @@
 
 #include "WindowSystem.h"
 
-using namespace DirectX;
+//using namespace DirectX;
 
 ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 	: m_affinity_data(affinityData)
@@ -14,8 +14,8 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
-	m_mouse = std::make_unique<Mouse>();
-	m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
+	//m_mouse = std::make_unique<Mouse>();
+	//m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
 
 	auto _win = Services::GetService<WindowSystem>(m_affinity_data.this_thread);
 
@@ -26,8 +26,8 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 
 ClayEngine::InputSystem::~InputSystem()
 {
-	m_mouse.reset();
-	m_mouse = nullptr;
+	//m_mouse.reset();
+	//m_mouse = nullptr;
 
 	m_display_buffer.reset();
 	m_display_buffer = nullptr;
@@ -44,15 +44,15 @@ void ClayEngine::InputSystem::OnMouseEvent(UINT message, WPARAM wParam, LPARAM l
 	//TODO: Currently deferred to DXTK Mouse class, replacing mouse functionality would be done here...
 }
 
-Mouse::State ClayEngine::InputSystem::GetMouseState()
-{
-	return m_mouse->GetState();
-}
-
-ClayEngine::Tracker& ClayEngine::InputSystem::GetButtonStateTracker()
-{
-	return m_tracker;
-}
+//Mouse::State ClayEngine::InputSystem::GetMouseState()
+//{
+//	return m_mouse->GetState();
+//}
+//
+//ClayEngine::Tracker& ClayEngine::InputSystem::GetButtonStateTracker()
+//{
+//	return m_tracker;
+//}
 
 void ClayEngine::InputSystem::OnKeyDown(WPARAM wParam, LPARAM lParam)
 {

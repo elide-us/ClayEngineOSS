@@ -14,8 +14,11 @@
 
 namespace ClayEngine
 {
-	using Message = std::function<void(WPARAM, LPARAM)>;
-	using Messages = std::vector<Message>;
+	using MouseMessage = std::function<void(UINT, WPARAM, LPARAM)>;
+	using MouseMessages = std::vector<MouseMessage>;
+
+	using KeyMessage = std::function<void(WPARAM, LPARAM)>;
+	using KeyMessages = std::vector<KeyMessage>;
 
 	using Function = std::function<void()>;
 	using Functions = std::vector<Function>;
@@ -51,9 +54,11 @@ namespace ClayEngine
 		Functions s_onsuspended = {};
 		Functions s_onresumed = {};
 		
-		Messages m_on_char = {};
-		Messages m_on_keydown = {};
-		Messages m_on_keyup = {};
+		KeyMessages m_on_char = {};
+		KeyMessages m_on_keydown = {};
+		KeyMessages m_on_keyup = {};
+
+		MouseMessages m_on_mousemessage = {};
 
 	public:
 		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
@@ -152,7 +157,7 @@ namespace ClayEngine
 			for (auto& element : s_onchanged) { element(); }
 		}
 
-		void AddOnCharCallback(Message fn)
+		void AddOnCharCallback(KeyMessage fn)
 		{
 			m_on_char.push_back(fn);
 		}
@@ -160,7 +165,8 @@ namespace ClayEngine
 		{
 			for (auto& element : m_on_char) { element(wParam, lParam); }
 		}
-		void AddOnKeyDownCallback(Message fn)
+
+		void AddOnKeyDownCallback(KeyMessage fn)
 		{
 			m_on_keydown.push_back(fn);
 		}
@@ -168,13 +174,22 @@ namespace ClayEngine
 		{
 			for (auto& element : m_on_keydown) { element(wParam, lParam); }
 		}
-		void AddOnKeyUpCallback(Message fn)
+		void AddOnKeyUpCallback(KeyMessage fn)
 		{
 			m_on_keyup.push_back(fn);
 		}
 		void OnKeyUp(WPARAM wParam, LPARAM lParam)
 		{
 			for (auto& element : m_on_keyup) { element(wParam, lParam); }
+		}
+
+		void AddOnMouseMessageCallback(MouseMessage fn)
+		{
+			m_on_mousemessage.push_back(fn);
+		}
+		void OnMouesMessage(UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_mousemessage) { element(message, wParam, lParam); }
 		}
 		#pragma endregion
 	};
