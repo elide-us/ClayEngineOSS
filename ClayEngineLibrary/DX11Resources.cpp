@@ -237,11 +237,11 @@ void ClayEngine::DX11Resources::StartPipeline()
 		_hr = _factory->MakeWindowAssociation(_hwnd, DXGI_MWA_NO_ALT_ENTER);
 		if (FAILED(_hr)) throw std::exception("MakeWindowAssociation");
 
-		// Everything up to Swap Chain done, now need RTV and DSV
-
 		// UpdateColorSpace()
 
-		// _swap_chain -> GetBuffer
+		_hr = m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_context.ReleaseAndGetAddressOf()));
+		if (FAILED(_hr)) throw std::exception("GetBuffer");
+
 
 		// RTV Desc
 

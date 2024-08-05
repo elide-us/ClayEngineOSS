@@ -9,6 +9,7 @@
 
 #include "Strings.h"
 #include "Services.h"
+//#include "TimingSystem.h"
 
 namespace ClayEngine
 {
@@ -21,7 +22,6 @@ namespace ClayEngine
         HINSTANCE m_instance_handle = {};
 		UINT m_show_flags = SW_SHOWDEFAULT;
 
-        //Affinity m_affinity;
         AffinityData m_affinity_data;
 
     public:

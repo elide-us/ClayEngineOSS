@@ -18,10 +18,10 @@ void ClayEngine::ContentSystem::StartContentSystem()
 {
     auto device = Services::GetService<DX11Resources>(m_affinity_data.this_thread)->GetDevice();
 
-    m_textures = Services::MakeService<TextureResources>(m_affinity_data, true);
+    m_textures = Services::MakeService<TextureResources>(m_affinity_data);
     m_textures->SetDevice(device);
 
-    m_fonts = Services::MakeService<FontResources>(m_affinity_data, true);
+    m_fonts = Services::MakeService<FontResources>(m_affinity_data);
     m_fonts->SetDevice(device);
 
     m_json = std::make_unique<JsonFile>(c_content_filename);

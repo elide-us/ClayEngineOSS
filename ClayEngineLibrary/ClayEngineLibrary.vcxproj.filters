@@ -18,6 +18,18 @@
     <ClCompile Include="InputSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
+    <ClCompile Include="DX11Resources.cpp">
+      <Filter>Private\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="DX11Textures.cpp">
+      <Filter>Private\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="ContentSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="TimingSystem.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Services.h">
@@ -46,6 +58,18 @@
     <ClInclude Include="InputSystem.h">
       <Filter>Public\Systems</Filter>
     </ClInclude>
+    <ClInclude Include="DX11Resources.h">
+      <Filter>Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="DX11Textures.h">
+      <Filter>Public\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="ContentSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="TimingSystem.h">
+      <Filter>Public</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Private">
@@ -54,9 +78,6 @@
     </Filter>
     <Filter Include="Private\Graphics">
       <UniqueIdentifier>{9ac188c7-7618-4978-b875-c83a9e83efe1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Private\SimpleMath">
-      <UniqueIdentifier>{7706ee5d-908d-4d05-9750-9f29c8bc1cdd}</UniqueIdentifier>
     </Filter>
     <Filter Include="Private\Utility">
       <UniqueIdentifier>{88fce877-63d9-4c64-a723-bf59b39d9136}</UniqueIdentifier>
@@ -73,9 +94,6 @@
     </Filter>
     <Filter Include="Public\Utility">
       <UniqueIdentifier>{6c6ef57d-4bcb-477d-8253-92ab0bf83057}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Public\SimpleMath">
-      <UniqueIdentifier>{6b466c99-ba59-4453-82e3-52aa8d92eb8f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Public\Systems">
       <UniqueIdentifier>{59c08fee-d9d5-4e82-adea-05992240bd9c}</UniqueIdentifier>

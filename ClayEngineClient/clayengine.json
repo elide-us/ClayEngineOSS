@@ -4,6 +4,11 @@
       "class": "client01",
       "title": "ClayEngine Test Client 01",
       "type": "client"
+    },
+    {
+      "class": "client02",
+      "title": "ClayEngine Test Client 02",
+      "type": "client"
     }
   ]
 }

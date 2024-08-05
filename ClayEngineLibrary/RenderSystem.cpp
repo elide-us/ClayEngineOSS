@@ -22,10 +22,10 @@ void ClayEngine::RenderSystem::StartRenderSystem()
 	m_resources = Services::MakeService<DX11Resources>(m_affinity_data);
 
 	// This SpriteBatch can be used for 2D games and User Interface elements
-	m_spritebatch = Services::MakeService<SpriteBatch>(m_affinity_data, m_resources->GetContext());
+	//m_spritebatch = Services::MakeService<SpriteBatch>(m_affinity_data, m_resources->GetContext());
 
 	// This primitive pipeline is designed to render basic 3D vertex buffer objects
-	m_primitive = Services::MakeService<PrimitivePipeline>(m_affinity_data, m_resources->GetContext());
+	//m_primitive = Services::MakeService<PrimitivePipeline>(m_affinity_data, m_resources->GetContext());
 }
 
 void ClayEngine::RenderSystem::StopRenderSystem()
