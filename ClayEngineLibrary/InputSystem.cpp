@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "InputSystem.h"
 
+#include "Services.h"
 #include "WindowSystem.h"
 
 //using namespace DirectX;
@@ -14,14 +15,25 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
+	m_mouse = std::make_unique<MouseHandler>();
+	m_mouse->RegisterMouseDevice(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
+
+	m_keyboard = std::make_unique<KeyboardHandler>();
+	//TODO: Implement KeyboardHandler
+	m_gamepad = std::make_unique<GamepadHandler>();
+
 	//m_mouse = std::make_unique<Mouse>();
 	//m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
 
 	auto _win = Services::GetService<WindowSystem>(m_affinity_data.this_thread);
+	_win->AddOnRawInputMessageCallback ([&](LPARAM lParam) { m_mouse->ProcessRawInput(lParam); });
 
 	_win->AddOnCharCallback([&](WPARAM wParam, LPARAM lParam) { OnChar(wParam, lParam); });
 	_win->AddOnKeyDownCallback([&](WPARAM wParam, LPARAM lParam) { OnKeyDown(wParam, lParam); });
 	_win->AddOnKeyUpCallback([&](WPARAM wParam, LPARAM lParam) { OnKeyUp(wParam, lParam); });
+
+	//TODO: Implement OnMouesMessage
+	//_win->AddOnMouseMessageCallback([&](UINT message, WPARAM wParam, LPARAM lParam) { OnMouesMessage(message, wParam, lParam); });
 }
 
 ClayEngine::InputSystem::~InputSystem()

@@ -9,14 +9,18 @@
 /******************************************************************************/
 
 #include <Windows.h>
+
 #include "Strings.h"
 #include "Services.h"
 
 namespace ClayEngine
 {
+	using InputMessage = std::function<void(LPARAM)>;
+	using InputMessages = std::vector<InputMessage>;
+
 	using MouseMessage = std::function<void(UINT, WPARAM, LPARAM)>;
 	using MouseMessages = std::vector<MouseMessage>;
-
+	
 	using KeyMessage = std::function<void(WPARAM, LPARAM)>;
 	using KeyMessages = std::vector<KeyMessage>;
 
@@ -57,8 +61,9 @@ namespace ClayEngine
 		KeyMessages m_on_char = {};
 		KeyMessages m_on_keydown = {};
 		KeyMessages m_on_keyup = {};
-
+		
 		MouseMessages m_on_mousemessage = {};
+		InputMessages m_on_inputmessage = {};
 
 	public:
 		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
@@ -156,6 +161,7 @@ namespace ClayEngine
 
 			for (auto& element : s_onchanged) { element(); }
 		}
+		#pragma endregion
 
 		void AddOnCharCallback(KeyMessage fn)
 		{
@@ -174,6 +180,7 @@ namespace ClayEngine
 		{
 			for (auto& element : m_on_keydown) { element(wParam, lParam); }
 		}
+
 		void AddOnKeyUpCallback(KeyMessage fn)
 		{
 			m_on_keyup.push_back(fn);
@@ -187,11 +194,19 @@ namespace ClayEngine
 		{
 			m_on_mousemessage.push_back(fn);
 		}
-		void OnMouesMessage(UINT message, WPARAM wParam, LPARAM lParam)
+		void OnMouseMessage(UINT message, WPARAM wParam, LPARAM lParam)
 		{
 			for (auto& element : m_on_mousemessage) { element(message, wParam, lParam); }
 		}
-		#pragma endregion
+
+		void AddOnRawInputMessageCallback(InputMessage fn)
+		{
+			m_on_inputmessage.push_back(fn);
+		}
+		void OnRawInputMessage(LPARAM lParam)
+		{
+			for (auto& element : m_on_inputmessage) { element(lParam); }
+		}
 	};
 	using WindowSystemPtr = std::unique_ptr<WindowSystem>;
 	using WindowSystemRaw = WindowSystem*;

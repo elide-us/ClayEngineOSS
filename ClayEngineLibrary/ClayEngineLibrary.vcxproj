@@ -88,6 +88,7 @@
     <ClInclude Include="DX11DeviceFactory.h" />
     <ClInclude Include="DX11Resources.h" />
     <ClInclude Include="DX11Textures.h" />
+    <ClInclude Include="InputDevices.h" />
     <ClInclude Include="InputSystem.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="pch.h" />
@@ -104,6 +105,7 @@
     <ClCompile Include="DX11DeviceFactory.cpp" />
     <ClCompile Include="DX11Resources.cpp" />
     <ClCompile Include="DX11Textures.cpp" />
+    <ClCompile Include="InputDevices.cpp" />
     <ClCompile Include="InputSystem.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

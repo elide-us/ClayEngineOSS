@@ -57,7 +57,8 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
     
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
-    //auto _input = Services::MakeService<InputSystem>(_affinity);
+    auto _input = Services::MakeService<InputSystem>(_affinity);
+
 
     auto _resources = Services::MakeService<DX11Resources>(_affinity);
     auto _content = Services::MakeService<ContentSystem>(_affinity);

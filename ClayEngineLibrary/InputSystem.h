@@ -10,7 +10,7 @@
 #include "Strings.h"
 #include "Services.h"
 
-#include "Mouse.h"
+#include "InputDevices.h"
 
 #include <ctime>
 
@@ -435,8 +435,8 @@ namespace ClayEngine
 		}
 	};
 
-	using MousePtr = std::unique_ptr<DirectX::Mouse>;
-	using Tracker = DirectX::Mouse::ButtonStateTracker;
+	//using MousePtr = std::unique_ptr<DirectX::Mouse>;
+	//using Tracker = DirectX::Mouse::ButtonStateTracker;
 
 	using InputBuffer = StringBuffer<c_max_stringbuffer_length>;
 	using InputBufferPtr = std::unique_ptr<InputBuffer>;
@@ -460,6 +460,10 @@ namespace ClayEngine
 		//MousePtr m_mouse = nullptr;
 		//Tracker m_tracker = {};
 
+		std::unique_ptr<KeyboardHandler> m_keyboard = nullptr;
+		std::unique_ptr<MouseHandler> m_mouse = nullptr;
+		std::unique_ptr<GamepadHandler> m_gamepad = nullptr;
+
 		InputBufferPtr m_input_buffer = nullptr;
 		ScrollbackBufferPtr m_scrollback_buffer = nullptr;
 		DisplayBufferPtr m_display_buffer = nullptr;
@@ -472,6 +476,60 @@ namespace ClayEngine
 	public:
 		InputSystem(AffinityData affinityData);
 		~InputSystem();
+
+		void OnRawInputMessage(LPARAM lParam)
+		{
+			// Retrieve the raw input data size
+			HRAWINPUT hRawInput = (HRAWINPUT)lParam;
+			UINT dwSize = 0;
+
+			// Get the size of the input data
+			GetRawInputData(hRawInput, RID_INPUT, 0, &dwSize, sizeof(RAWINPUTHEADER));
+			if (dwSize == 0)
+			{
+				return; // No data to process
+			}
+
+			// Allocate a vector to store the raw input data
+			std::vector<BYTE> rawData(dwSize);
+
+			// Retrieve the raw input data into the vector
+			if (GetRawInputData(hRawInput, RID_INPUT, rawData.data(), &dwSize, sizeof(RAWINPUTHEADER)) != dwSize)
+			{
+				return; // Failed to retrieve the data
+			}
+
+			// Cast the buffer to RAWINPUT structure
+			RAWINPUT* raw = reinterpret_cast<RAWINPUT*>(rawData.data());
+
+			// Determine the type of raw input (mouse, keyboard, gamepad)
+			if (raw->header.dwType == RIM_TYPEMOUSE)
+			{
+				// Delegate to the MouseHandler class
+				if (m_mouse)
+				{
+					m_mouse->ProcessRawInput(lParam);
+				}
+			}
+			else if (raw->header.dwType == RIM_TYPEKEYBOARD)
+			{
+				// Delegate to the KeyboardHandler class
+				if (m_keyboard)
+				{
+					m_keyboard->ProcessRawInput(lParam);
+				}
+			}
+			else if (raw->header.dwType == RIM_TYPEHID)
+			{
+				// HID devices can include gamepads, delegate to the GamepadHandler class
+				if (m_gamepad)
+				{
+					m_gamepad->ProcessRawInput(lParam);
+				}
+			}
+		};
+
+
 
 		void OnMouseEvent(UINT message, WPARAM wParam, LPARAM lParam);
 		//DirectX::Mouse::State GetMouseState();

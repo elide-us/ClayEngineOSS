@@ -14,7 +14,6 @@
     <ClCompile Include="WindowSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="ClayEngine.cpp" />
     <ClCompile Include="InputSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
@@ -28,7 +27,13 @@
       <Filter>Private\Systems</Filter>
     </ClCompile>
     <ClCompile Include="TimingSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="ClayEngine.cpp">
       <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="InputDevices.cpp">
+      <Filter>Private\Utility</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -68,7 +73,10 @@
       <Filter>Public\Systems</Filter>
     </ClInclude>
     <ClInclude Include="TimingSystem.h">
-      <Filter>Public</Filter>
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="InputDevices.h">
+      <Filter>Public\Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

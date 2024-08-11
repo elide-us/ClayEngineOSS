@@ -42,7 +42,7 @@ namespace ClayEngine
         case WM_ACTIVATEAPP:
             // These messages get sent to all windows in the process on cerntain events, we'll
             // need to make sure we are only procesing the message for windows that are relevant
-            _ctx->OnMouesMessage(message, wParam, lParam);
+            _ctx->OnMouseMessage(message, wParam, lParam);
             if (wParam)
             {
                 _ctx->OnActivated();
@@ -118,6 +118,8 @@ namespace ClayEngine
             PostQuitMessage(0);
             break;
         case WM_INPUT:
+            _ctx->OnRawInputMessage(lParam);
+            break;
         case WM_MOUSEMOVE:
         case WM_LBUTTONDOWN:
         case WM_LBUTTONUP:
@@ -129,7 +131,7 @@ namespace ClayEngine
         case WM_XBUTTONDOWN:
         case WM_XBUTTONUP:
         case WM_MOUSEHOVER:
-            _ctx->OnMouesMessage(message, wParam, lParam);
+            _ctx->OnMouseMessage(message, wParam, lParam);
             break;
         default:
             return DefWindowProc(hWnd, message, wParam, lParam);
