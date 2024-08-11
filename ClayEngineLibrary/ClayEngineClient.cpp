@@ -4,7 +4,7 @@
 #include "WindowSystem.h"
 #include "InputSystem.h"
 //#include "TimingSystem.h"
-//#include "ContentSystem.h"
+#include "ContentSystem.h"
 //#include "RenderSystem.h"
 //#include "NetworkSystem.h"
 
@@ -59,13 +59,16 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
     auto _input = Services::MakeService<InputSystem>(_affinity);
 
+
+    auto _resources = Services::MakeService<DX11Resources>(_affinity);
+    auto _content = Services::MakeService<ContentSystem>(_affinity);
+
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);
     
     //TODO: The RenderSystem and ContentSystem both compile by there are issues in the RenderSystem with device creation
     //auto _render = Services::MakeService<RenderSystem>(_affinity);
-    //auto _content = Services::MakeService<ContentSystem>(_affinity);
-
+    
     while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
     {
         MSG msg = {};

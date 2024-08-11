@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Services.h"
+#include "DX11Resources.h"
 
 #include "Effects.h"
 #include "CommonStates.h"
@@ -9,8 +10,6 @@
 #include "SimpleMath.h"
 #include "PrimitiveBatch.h"
 #include "VertexTypes.h"
-
-#include "DX11Resources.h"
 
 namespace ClayEngine
 {

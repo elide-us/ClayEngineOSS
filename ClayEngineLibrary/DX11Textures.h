@@ -11,6 +11,7 @@
 #include "SpriteFont.h"
 
 using namespace DirectX;
+using Microsoft::WRL::ComPtr;
 
 namespace ClayEngine
 {

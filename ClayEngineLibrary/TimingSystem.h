@@ -9,9 +9,34 @@
 #include "ClayEngine.h"
 #include "RenderSystem.h"
 
+#include <chrono>
+#include <future>
+#include <vector>
+#include <mutex>
+#include <functional>
+
 namespace ClayEngine
 {
-	using namespace ClayEngine::Graphics;
+	using UpdateCallback = std::function<void(float)>;
+	using UpdateCallbacks = std::vector<UpdateCallback>;
+
+	using DrawCallback = std::function<void()>;
+	using DrawCallbacks = std::vector<DrawCallback>;
+
+	constexpr auto c_target_frame_rate = 60UL;
+	constexpr auto c_ticks_per_second = 100'000'000ULL;
+
+	using TimePoint = std::chrono::steady_clock::time_point;
+	using TimeSpan = std::chrono::steady_clock::duration;
+	using Clock = std::chrono::steady_clock;
+	//using TimePoint = std::chrono::high_resolution_clock::time_point;
+	//using TimeSpan = std::chrono::high_resolution_clock::duration;
+	//using Clock = std::chrono::high_resolution_clock;
+
+	using Seconds = std::chrono::seconds;
+	using Milliseconds = std::chrono::milliseconds; // 1'000
+	using Microseconds = std::chrono::microseconds; // 1'000'000
+	using Nanoseconds = std::chrono::nanoseconds; // 1'000'000'000
 
 	inline double TicksToSeconds(uint64_t ticks) noexcept { return static_cast<double>(ticks) / c_ticks_per_second; }
 
@@ -71,6 +96,8 @@ namespace ClayEngine
 	/// </summary>
 	class TimingSystem
 	{
+		AffinityData m_affinity_data = {};
+
 		Thread m_thread;
 		Promise m_promise = {};
 
@@ -87,7 +114,7 @@ namespace ClayEngine
 		std::mutex m_draw_callbacks_mtx = {};
 
 	public:
-		TimingSystem();
+		TimingSystem(AffinityData affinityData);
 		~TimingSystem();
 
 		void StartTimer();
@@ -108,18 +135,18 @@ namespace ClayEngine
 	using TimingSystemPtr = std::unique_ptr<TimingSystem>;
 	using TimingSystemRaw = TimingSystem*;
 
-	class TimingSystemExtension
-	{
-	protected:
-		TimingSystemRaw ticker = nullptr;
-	public:
-		TimingSystemExtension()
-		{
-			ticker = Services::GetService<TimingSystem>(std::this_thread::get_id());
-		}
-		~TimingSystemExtension()
-		{
-			ticker = nullptr;
-		}
-	};
+	//class TimingSystemExtension
+	//{
+	//protected:
+	//	TimingSystemRaw ticker = nullptr;
+	//public:
+	//	TimingSystemExtension()
+	//	{
+	//		ticker = Services::GetService<TimingSystem>(m_affinity_data.this_thread);
+	//	}
+	//	~TimingSystemExtension()
+	//	{
+	//		ticker = nullptr;
+	//	}
+	//};
 }

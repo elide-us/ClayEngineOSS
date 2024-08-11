@@ -59,11 +59,13 @@ namespace ClayEngine
 		D3D_FEATURE_LEVEL m_min_feature_level = D3D_FEATURE_LEVEL_10_0;
 		D3D_FEATURE_LEVEL m_feature_level = {};
 
+		void createFactory();
+
 	public:
 		DX11DeviceFactory(AffinityData affinityData);
 		~DX11DeviceFactory();
 
-		const FactoryPtr GetFactory() const { return m_factory; }
+		const FactoryPtr GetFactory();
 
 		const bool GetSDKLayers() const { return m_sdk_layers; }
 		const D3D_FEATURE_LEVEL& GetFeatureLevel() const { return m_feature_level; }

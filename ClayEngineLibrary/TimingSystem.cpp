@@ -1,9 +1,7 @@
 #include "pch.h"
 #include "TimingSystem.h"
 
-using namespace ClayEngine;
-
-void TickMachine::operator()(Future future)
+void ClayEngine::TickMachine::operator()(Future future)
 {
     auto timing = Services::GetService<TimingSystem>(std::this_thread::get_id());
 
@@ -13,19 +11,19 @@ void TickMachine::operator()(Future future)
     }
 }
 
-TimingCore::TimingCore()
+ClayEngine::TimingCore::TimingCore()
 {
     m_total_timespan = TimeSpan::zero();
 
     ResetTimer();
 }
 
-TimingCore::~TimingCore()
+ClayEngine::TimingCore::~TimingCore()
 {
 
 }
 
-void TimingCore::ResetTimer()
+void ClayEngine::TimingCore::ResetTimer()
 {
     m_last_timepoint = Clock::now();
 
@@ -36,7 +34,7 @@ void TimingCore::ResetTimer()
     m_update_timespan = TimeSpan::zero();
 }
 
-void TimingCore::UpdateTimer()
+void ClayEngine::TimingCore::UpdateTimer()
 {
     auto now_timepoint = Clock::now();
     auto delta_timespan = now_timepoint - m_last_timepoint;
@@ -69,17 +67,18 @@ void TimingCore::UpdateTimer()
     }
 }
 
-TimingSystem::TimingSystem()
+ClayEngine::TimingSystem::TimingSystem(AffinityData affinityData)
+    : m_affinity_data(affinityData)
 {
 
 }
 
-TimingSystem::~TimingSystem()
+ClayEngine::TimingSystem::~TimingSystem()
 {
     StopTimer();
 }
 
-void TimingSystem::StartTimer()
+void ClayEngine::TimingSystem::StartTimer()
 {
     m_rs = Services::GetService<RenderSystem>(std::this_thread::get_id());
 
@@ -93,13 +92,13 @@ void TimingSystem::StartTimer()
     }
 }
 
-void TimingSystem::ResetTimer()
+void ClayEngine::TimingSystem::ResetTimer()
 {
     TimingSystem::StopTimer();
     TimingSystem::StartTimer();
 }
 
-void TimingSystem::StopTimer()
+void ClayEngine::TimingSystem::StopTimer()
 {
     if (m_timer_running)
     {
@@ -115,7 +114,7 @@ void TimingSystem::StopTimer()
     m_rs = nullptr;
 }
 
-void TimingSystem::RunGameTick()
+void ClayEngine::TimingSystem::RunGameTick()
 {
     m_timer->UpdateTimer();
     
@@ -148,42 +147,43 @@ double ClayEngine::TimingSystem::GetTotalSeconds()
     }
 }
 
-void TimingSystem::AddUpdateCallback(UpdateCallback fn)
+void ClayEngine::TimingSystem::AddUpdateCallback(UpdateCallback fn)
 {
     m_update_callbacks_mtx.lock();
     m_update_callbacks.push_back(fn);
     m_update_callbacks_mtx.unlock();
 }
 
-void TimingSystem::OnUpdateCallback(float elapsedTime)
+void ClayEngine::TimingSystem::OnUpdateCallback(float elapsedTime)
 {
     m_update_callbacks_mtx.lock();
     std::for_each(m_update_callbacks.begin(), m_update_callbacks.end(), [&](UpdateCallback element) { element(elapsedTime); });
     m_update_callbacks_mtx.unlock();
 }
 
-void TimingSystem::ClearUpdateCallbacks()
+void ClayEngine::TimingSystem::ClearUpdateCallbacks()
 {
     m_update_callbacks_mtx.lock();
+    //TODO: Consider adding CRITICAL_SECTION to this loop
     m_update_callbacks.clear();
     m_update_callbacks_mtx.unlock();
 }
 
-void TimingSystem::AddDrawCallback(DrawCallback fn)
+void ClayEngine::TimingSystem::AddDrawCallback(DrawCallback fn)
 {
     m_draw_callbacks_mtx.lock();
     m_draw_callbacks.push_back(fn);
     m_draw_callbacks_mtx.unlock();
 }
 
-void TimingSystem::OnDrawCallback()
+void ClayEngine::TimingSystem::OnDrawCallback()
 {
     m_draw_callbacks_mtx.lock();
     std::for_each(m_draw_callbacks.begin(), m_draw_callbacks.end(), [&](DrawCallback element) { element(); });
     m_draw_callbacks_mtx.unlock();
 }
 
-void TimingSystem::ClearDrawCallbacks()
+void ClayEngine::TimingSystem::ClearDrawCallbacks()
 {
     m_draw_callbacks_mtx.lock();
     m_draw_callbacks.clear();

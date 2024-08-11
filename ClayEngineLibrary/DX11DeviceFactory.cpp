@@ -1,6 +1,15 @@
 #include "pch.h"
 #include "DX11DeviceFactory.h"
 
+void ClayEngine::DX11DeviceFactory::createFactory()
+{
+#pragma region Create Device Factory
+	// Create the device factory
+	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(m_factory.ReleaseAndGetAddressOf())), "ClayEngine CRITICAL: Failed to create DXGI factory");
+#pragma endregion
+
+}
+
 ClayEngine::DX11DeviceFactory::DX11DeviceFactory(AffinityData affinityData)
 {
 	m_affinity_data = affinityData;
@@ -13,10 +22,7 @@ ClayEngine::DX11DeviceFactory::DX11DeviceFactory(AffinityData affinityData)
 #endif
 #pragma endregion
 
-#pragma region Create Device Factory
-	// Create the device factory
-	ThrowIfFailed(CreateDXGIFactory1(IID_PPV_ARGS(m_factory.ReleaseAndGetAddressOf())), "ClayEngine CRITICAL: Failed to create DXGI factory");
-#pragma endregion
+	createFactory();
 
 #pragma region Check Device Options
 	// Determines whether tearing support is available for fullscreen borderless windows.
@@ -66,5 +72,15 @@ ClayEngine::DX11DeviceFactory::~DX11DeviceFactory()
 		m_factory.Reset();
 		m_factory = nullptr;
 	}
+}
+
+const ClayEngine::FactoryPtr ClayEngine::DX11DeviceFactory::GetFactory()
+{
+	if (!m_factory->IsCurrent())
+	{
+		createFactory();
+	}
+
+	return m_factory;
 }
 

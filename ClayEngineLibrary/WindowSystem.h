@@ -9,13 +9,20 @@
 /******************************************************************************/
 
 #include <Windows.h>
+
 #include "Strings.h"
 #include "Services.h"
 
 namespace ClayEngine
 {
-	using Message = std::function<void(WPARAM, LPARAM)>;
-	using Messages = std::vector<Message>;
+	using InputMessage = std::function<void(LPARAM)>;
+	using InputMessages = std::vector<InputMessage>;
+
+	using MouseMessage = std::function<void(UINT, WPARAM, LPARAM)>;
+	using MouseMessages = std::vector<MouseMessage>;
+	
+	using KeyMessage = std::function<void(WPARAM, LPARAM)>;
+	using KeyMessages = std::vector<KeyMessage>;
 
 	using Function = std::function<void()>;
 	using Functions = std::vector<Function>;
@@ -50,7 +57,13 @@ namespace ClayEngine
 		Functions s_ondeactivated = {};
 		Functions s_onsuspended = {};
 		Functions s_onresumed = {};
-		Messages s_onchar = {};
+		
+		KeyMessages m_on_char = {};
+		KeyMessages m_on_keydown = {};
+		KeyMessages m_on_keyup = {};
+		
+		MouseMessages m_on_mousemessage = {};
+		InputMessages m_on_inputmessage = {};
 
 	public:
 		WindowSystem(AffinityData affinityId, HINSTANCE hInstance, int nCmdShow, Unicode className, Unicode windowName);
@@ -126,41 +139,21 @@ namespace ClayEngine
 		#pragma endregion
 
 		#pragma region Window event callback handlers
-		void AddOnActivatedCallback(Function fn)
-		{
-			s_onactivated.push_back(fn);
-		}
 		void OnActivated()
 		{
 			for (auto& element : s_onactivated) { element(); }
-		}
-		void AddOnResumingCallback(Function fn)
-		{
-			s_onresumed.push_back(fn);
 		}
 		void OnResuming()
 		{
 			for (auto& element : s_onresumed) { element(); }
 		}
-		void AddOnSuspendedCallback(Function fn)
-		{
-			s_onsuspended.push_back(fn);
-		}
 		void OnSuspending()
 		{
 			for (auto& element : s_onsuspended) { element(); }
 		}
-		void AddOnDeactivatedCallback(Function fn)
-		{
-			s_ondeactivated.push_back(fn);
-		}
 		void OnDeactivated()
 		{
 			for (auto& element : s_ondeactivated) { element(); }
-		}
-		void AddOnChangedCallback(Function fn)
-		{
-			s_onchanged.push_back(fn);
 		}
 		void OnChanged()
 		{
@@ -168,16 +161,52 @@ namespace ClayEngine
 
 			for (auto& element : s_onchanged) { element(); }
 		}
+		#pragma endregion
 
-		void AddOnCharCallback(Message fn)
+		void AddOnCharCallback(KeyMessage fn)
 		{
-			s_onchar.push_back(fn);
+			m_on_char.push_back(fn);
 		}
 		void OnChar(WPARAM wParam, LPARAM lParam)
 		{
-			for (auto& element : s_onchar) { element(wParam, lParam); }
+			for (auto& element : m_on_char) { element(wParam, lParam); }
 		}
-		#pragma endregion
+
+		void AddOnKeyDownCallback(KeyMessage fn)
+		{
+			m_on_keydown.push_back(fn);
+		}
+		void OnKeyDown(WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_keydown) { element(wParam, lParam); }
+		}
+
+		void AddOnKeyUpCallback(KeyMessage fn)
+		{
+			m_on_keyup.push_back(fn);
+		}
+		void OnKeyUp(WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_keyup) { element(wParam, lParam); }
+		}
+
+		void AddOnMouseMessageCallback(MouseMessage fn)
+		{
+			m_on_mousemessage.push_back(fn);
+		}
+		void OnMouseMessage(UINT message, WPARAM wParam, LPARAM lParam)
+		{
+			for (auto& element : m_on_mousemessage) { element(message, wParam, lParam); }
+		}
+
+		void AddOnRawInputMessageCallback(InputMessage fn)
+		{
+			m_on_inputmessage.push_back(fn);
+		}
+		void OnRawInputMessage(LPARAM lParam)
+		{
+			for (auto& element : m_on_inputmessage) { element(lParam); }
+		}
 	};
 	using WindowSystemPtr = std::unique_ptr<WindowSystem>;
 	using WindowSystemRaw = WindowSystem*;
