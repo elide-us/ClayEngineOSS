@@ -48,3 +48,10 @@ x64/
 Artifacts/
 DirectXTK/
 packages/
+/ATGTK
+/UITK
+/ChatGPT_OLServer
+/ChatGPT_OLClient
+/DirectXTK12
+/include
+/OpenSource
