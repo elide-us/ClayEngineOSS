@@ -450,6 +450,13 @@ namespace ClayEngine
 	using DisplayBufferPtr = std::unique_ptr<DisplayBuffer>;
 	using DisplayBufferRaw = DisplayBuffer*;
 
+	struct RawInputDeviceInfo
+	{
+		RAWINPUTDEVICELIST DeviceHeader;
+		RID_DEVICE_INFO DeviceInfo;
+		Unicode DeviceName;
+	};
+
 	/// <summary>
 	/// Input system is the top level API for handling user input events
 	/// </summary>

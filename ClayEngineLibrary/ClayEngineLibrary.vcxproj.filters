@@ -35,6 +35,12 @@
     <ClCompile Include="InputDevices.cpp">
       <Filter>Private\Utility</Filter>
     </ClCompile>
+    <ClCompile Include="AsyncNetworkSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="NetworkSystem.cpp">
+      <Filter>Private\Systems</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Services.h">
@@ -78,6 +84,12 @@
     <ClInclude Include="InputDevices.h">
       <Filter>Public\Utility</Filter>
     </ClInclude>
+    <ClInclude Include="AsyncNetworkSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="NetworkSystem.h">
+      <Filter>Public\Systems</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Private">
@@ -106,5 +118,8 @@
     <Filter Include="Public\Systems">
       <UniqueIdentifier>{59c08fee-d9d5-4e82-adea-05992240bd9c}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

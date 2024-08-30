@@ -152,3 +152,15 @@ void ClayEngine::ClayEngine::Run()
 //		}
 //	}
 #pragma endregion
+
+// S - Diamond - Mythical - Orange - 2.5
+// A - Platinum - Legendry - Red - 2.25
+// B - Gold - Epic - Purple - 2.0
+// C - Silver - Superior - Blue - 1.75
+// D - Bronze - Uncommon - Green - 1.5
+// E - Iron - Common - White - 1.25
+// F - Stone - Junk - Grey - 1.0
+
+
+
+
