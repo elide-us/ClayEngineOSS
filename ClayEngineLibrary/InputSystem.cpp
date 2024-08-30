@@ -15,18 +15,131 @@ ClayEngine::InputSystem::InputSystem(AffinityData affinityData)
 
 	m_caps_lock = 0x01 & GetKeyState(VK_CAPITAL);
 
+
+	// Register Mouse, Keyboard, and Gamepad input types
+	std::vector<RAWINPUTDEVICE> _rids = {};
+	_rids.emplace_back(RAWINPUTDEVICE{ 0x01, 0x05, 0, NULL }); // Gamepad
+	_rids.emplace_back(RAWINPUTDEVICE{ 0x01, 0x02, RIDEV_NOLEGACY, NULL }); // Mouse
+	_rids.emplace_back(RAWINPUTDEVICE{ 0x01, 0x06, RIDEV_NOLEGACY, NULL }); // Keyboard
+	RegisterRawInputDevices(_rids.data(), (UINT)_rids.size(), sizeof(RAWINPUTDEVICE));
+
+	UINT _device_count = 0;
+	std::vector<RAWINPUTDEVICELIST> _device_list = {};
+
+	// Populate Device List
+	while (true)
+	{
+		GetRawInputDeviceList(nullptr, &_device_count, sizeof(RAWINPUTDEVICELIST));
+		
+		if (_device_count == 0) break;
+		_device_list.resize(_device_count);
+
+		auto _hr = GetRawInputDeviceList(_device_list.data(), &_device_count, sizeof(RAWINPUTDEVICELIST));
+		if (_hr == (UINT)-1) { if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) { continue; } }
+
+		break;
+	}
+
+	std::vector<RawInputDeviceInfo> _ridis = {};
+
+	for (auto& element : _device_list)
+	{
+		RID_DEVICE_INFO rdi;
+		rdi.cbSize = sizeof(RID_DEVICE_INFO);
+		UINT cbSize = sizeof(RID_DEVICE_INFO);
+
+		// Get device information
+		if (GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICEINFO, &rdi, &cbSize) > 0)
+		{
+
+		}
+	}
+	
+	
+
+
+
+
+
+	for (auto& element : _device_list)
+	{
+		// Filter for mouse, keyboard, and gamepad devices
+		if (element.dwType == RIM_TYPEMOUSE || element.dwType == RIM_TYPEKEYBOARD)
+		{
+			// Get the size of the device name
+			UINT _size = 0;
+			GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICENAME, nullptr, &_size);
+			if (_size == 0) continue;
+
+			// Allocate memory for the device name
+			std::vector<wchar_t> _device_name(_size);
+
+			// Get the device name
+			if (GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICENAME, _device_name.data(), &_size) > 0)
+			{
+				// Convert wchar_t to std::wstring and then to std::string
+				std::wstring device_name_wstr(_device_name.begin(), _device_name.end());
+				WriteLine("Keyboard/Mouse:");
+				WriteLine(device_name_wstr.c_str());
+			}
+		}
+		else if (element.dwType == RIM_TYPEHID)
+		{
+			// We need to further check if this HID device is a gamepad
+			// Get the device information
+			RID_DEVICE_INFO rdi; 
+			rdi.cbSize = sizeof(rdi);
+			UINT cbSize = sizeof(rdi);
+			if (GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICEINFO, &rdi, &cbSize) > 0)
+			{
+				if (rdi.hid.usUsagePage == 0x01 && rdi.hid.usUsage == 0x05)
+				{
+					// Get the size of the device name
+					UINT _size = 0;
+					GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICENAME, nullptr, &_size);
+					if (_size == 0) continue;
+
+					// Allocate memory for the device name
+					std::vector<wchar_t> _device_name(_size);
+
+					// Get the device name
+					if (GetRawInputDeviceInfo(element.hDevice, RIDI_DEVICENAME, _device_name.data(), &_size) > 0)
+					{
+						// Convert wchar_t to std::wstring and then to std::string
+						std::wstring device_name_wstr(_device_name.begin(), _device_name.end());
+						WriteLine("Gamepad:");
+						WriteLine(device_name_wstr.c_str());
+					}
+				}
+				else
+				{
+					continue; // Skip non-gamepad HID devices
+				}
+			}
+		}
+		else
+		{
+			continue; // Skip other types of devices
+		}
+	}
+
+
+
+
 	m_mouse = std::make_unique<MouseHandler>();
 	m_mouse->RegisterMouseDevice(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
 
 	m_keyboard = std::make_unique<KeyboardHandler>();
 	//TODO: Implement KeyboardHandler
 	m_gamepad = std::make_unique<GamepadHandler>();
+	m_gamepad->RegisterGamepadDevice(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
 
 	//m_mouse = std::make_unique<Mouse>();
 	//m_mouse->SetWindow(Services::GetService<WindowSystem>(m_affinity_data.this_thread)->GetWindowHandle());
 
 	auto _win = Services::GetService<WindowSystem>(m_affinity_data.this_thread);
-	_win->AddOnRawInputMessageCallback ([&](LPARAM lParam) { m_mouse->ProcessRawInput(lParam); });
+	_win->AddOnRawInputMessageCallback([&](LPARAM lParam) { m_mouse->ProcessRawInput(lParam); });
+	_win->AddOnRawInputMessageCallback([&](LPARAM lParam) { m_gamepad->ProcessRawInput(lParam); });
 
 	_win->AddOnCharCallback([&](WPARAM wParam, LPARAM lParam) { OnChar(wParam, lParam); });
 	_win->AddOnKeyDownCallback([&](WPARAM wParam, LPARAM lParam) { OnKeyDown(wParam, lParam); });

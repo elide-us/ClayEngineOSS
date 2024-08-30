@@ -418,15 +418,13 @@ namespace ClayEngine
 		GamepadHandler() = default;
 		~GamepadHandler() = default;
 
-		void RegisterGamepadDevice(Affinity threadId)
+		void RegisterGamepadDevice(HWND hWnd)
 		{
-			auto hwnd = Services::GetService<WindowSystem>(threadId)->GetWindowHandle();
-
 			RAWINPUTDEVICE rid;
 			rid.usUsagePage = 0x01;          // HID_USAGE_PAGE_GENERIC
 			rid.usUsage = 0x05;              // HID_USAGE_GENERIC_GAMEPAD
 			rid.dwFlags = RIDEV_INPUTSINK;   // Get events even when not in focus
-			rid.hwndTarget = hwnd;
+			rid.hwndTarget = hWnd;
 
 			if (RegisterRawInputDevices(&rid, 1, sizeof(rid)) == FALSE)
 			{
@@ -456,10 +454,10 @@ namespace ClayEngine
 			if (raw->header.dwType == RIM_TYPEHID)
 			{
 				USHORT buttons = *((USHORT*)&rawData[0]);
-				m_current.DPadUp = (buttons & 0x01) ? ButtonState::STATE_PRESSED : ButtonState::STATE_RELEASED;
-				m_current.DPadDown = (buttons & 0x02) ? ButtonState::STATE_PRESSED : ButtonState::STATE_RELEASED;
-				m_current.DPadLeft = (buttons & 0x04) ? ButtonState::STATE_PRESSED : ButtonState::STATE_RELEASED;
-				m_current.DPadRight = (buttons & 0x08) ? ButtonState::STATE_PRESSED : ButtonState::STATE_RELEASED;
+				m_current.DPadUp = (buttons & 0x01) ? ButtonState::STATE_DOWN : ButtonState::STATE_UP;
+				m_current.DPadDown = (buttons & 0x02) ? ButtonState::STATE_DOWN : ButtonState::STATE_UP;
+				m_current.DPadLeft = (buttons & 0x04) ? ButtonState::STATE_DOWN : ButtonState::STATE_UP;
+				m_current.DPadRight = (buttons & 0x08) ? ButtonState::STATE_DOWN : ButtonState::STATE_UP;
 
 				// Triggers
 				//gamepadState.leftTrigger = rawData[2];
@@ -470,6 +468,8 @@ namespace ClayEngine
 				//gamepadState.leftStickY = *((SHORT*)&rawData[6]);
 				//gamepadState.rightStickX = *((SHORT*)&rawData[8]);
 				//gamepadState.rightStickY = *((SHORT*)&rawData[10]);
+
+				m_last = m_current;
 			}
 		};
 	};
