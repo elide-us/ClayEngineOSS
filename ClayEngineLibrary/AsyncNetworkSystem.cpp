@@ -204,22 +204,17 @@ void Experimental::AsyncNetworkWorker::operator()(HANDLE hCompletionPort, FUTURE
 		BOOL result = GetQueuedCompletionStatus(hCompletionPort, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
 		if (result)
 		{
-			auto data = reinterpret_cast<Experimental::OperationData*>(pOverlapped);
+			auto data = reinterpret_cast<Experimental::OperationData*>(completionKey);
 			
-			switch (data->Operation)
+			switch ((int)data->Operation)
 			{
-			case OPERATION::AcceptConnection:
+			case 2:
 			{
-				// Create GUID, link to SOCKET
-
+				// Process WSARecv for data
 			}
-			case OPERATION::ReadFromNetwork:
+			case 3:
 			{
-				
-			}
-			case OPERATION::WriteToNetwork:
-			{
-				
+				// Process WSASend for data
 			}
 			default:
 				continue;
@@ -231,6 +226,24 @@ void Experimental::AsyncNetworkWorker::operator()(HANDLE hCompletionPort, FUTURE
 
 void Experimental::AsyncListenWorker::operator()(HANDLE hCompletionPort, FUTURE future)
 {
+	DWORD bytesTransferred;
+	ULONG_PTR completionKey;
+	LPOVERLAPPED pOverlapped;
+
+	while (future.wait_for(Nanoseconds(0)) == std::future_status::timeout)
+	{
+		// Get the completion status
+		BOOL result = GetQueuedCompletionStatus(hCompletionPort, &bytesTransferred, &completionKey, &pOverlapped, INFINITE);
+		if (result)
+		{
+			auto data = reinterpret_cast<Experimental::OperationData*>(pOverlapped);
+
+			if ((int)data->Operation == 1)
+			{
+				//Process AcceptEx data
+			}
+		}
+	}
 
 }
 
@@ -296,7 +309,7 @@ struct Experimental::OperationData
 };
 #pragma endregion
 
-
+// Instantiate this object to manage a thread for the listener
 Experimental::NbioListenContext::NbioListenContext()
 {
 
@@ -306,7 +319,7 @@ Experimental::NbioListenContext::~NbioListenContext()
 {
 
 }
-
+// Instantiate this object for the NBIO API
 Experimental::NbioListenServerModule::NbioListenServerModule()
 {
 
@@ -317,15 +330,17 @@ Experimental::NbioListenServerModule::~NbioListenServerModule()
 
 }
 
-void Experimental::NbioListenServerModule::Start()
+// Should start up the thread, socket, and listen loop
+void Experimental::NbioListenServerModule::startListenServer()
 {
 
 }
 
-void Experimental::NbioListenServerModule::Stop()
+void Experimental::NbioListenServerModule::stopListenServer()
 {
 
 }
+
 
 bool Experimental::ClientConnectModule::tryConnectToServer()
 {
@@ -392,7 +407,6 @@ void Experimental::AsyncNetworkSystem::stopWorkerThreads()
 	}
 }
 
-//TODO: We're going to just do this on startup for AsyncNetworkSystem
 void Experimental::AsyncNetworkSystem::startListenServer()
 {
 	// Get the local address info struct

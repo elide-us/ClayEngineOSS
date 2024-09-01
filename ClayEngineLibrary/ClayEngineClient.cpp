@@ -6,7 +6,7 @@
 //#include "TimingSystem.h"
 #include "ContentSystem.h"
 //#include "RenderSystem.h"
-//#include "NetworkSystem.h"
+#include "AsyncNetworkSystem.h"
 
 #pragma region ClayEngineClientEntryPoint Declaration
 namespace ClayEngine
@@ -62,6 +62,8 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
 
     auto _resources = Services::MakeService<DX11Resources>(_affinity);
     auto _content = Services::MakeService<ContentSystem>(_affinity);
+
+    auto _network = std::make_unique<Experimental::AsyncNetworkSystem>(L"127.0.0.1", L"19740");
 
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);

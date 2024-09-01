@@ -12,7 +12,8 @@
 
 namespace Experimental
 {
-	constexpr auto c_service_threads = 10UL; // 2x Accept, 4x Send, 4x Recv
+	constexpr auto c_service_threads = 10UL; // 5x Send, 5x Recv
+	constexpr auto c_listen_threads = 4UL;
 	constexpr auto c_family = AF_INET;
 	constexpr auto c_socktype = SOCK_STREAM;
 	constexpr auto c_protocol = IPPROTO_TCP;
@@ -114,7 +115,7 @@ namespace Experimental
 
 		struct AcceptThreadFunctor
 		{
-			void operator()(std::future<void> future)
+			void operator()(FUTURE future)
 			{
 				while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
 				{
@@ -125,13 +126,11 @@ namespace Experimental
 			std::tuple<bool, SOCKET, SOCKADDR> checkAcceptForClient(SOCKET s);
 		};
 
+		void startListenServer();
+		void stopListenServer();
 	public:
 		NbioListenServerModule();
 		~NbioListenServerModule();
-
-		void Start();
-		void Stop();
-
 	};
 	using NbioListenServerModulePtr = std::unique_ptr<NbioListenServerModule>;
 
