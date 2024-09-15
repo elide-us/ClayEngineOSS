@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "TimingSystem.h"
 
-void ClayEngine::TickMachine::operator()(Future future)
+void ClayEngine::TickMachine::operator()(FUTURE future)
 {
     auto timing = Services::GetService<TimingSystem>(std::this_thread::get_id());
 

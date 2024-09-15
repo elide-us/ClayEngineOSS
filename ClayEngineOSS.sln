@@ -11,15 +11,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		ClayEngineClient.props = ClayEngineClient.props
-		ClayEngineHeadless.props = ClayEngineHeadless.props
 		ClayEngineLibrary.props = ClayEngineLibrary.props
+		ClayEngineOutput.props = ClayEngineOutput.props
+		ClayEngineServer.props = ClayEngineServer.props
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClayEngineHeadless", "ClayEngineHeadless\ClayEngineHeadless.vcxproj", "{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK", "DirectXTK\DirectXTK_Desktop_2022.vcxproj", "{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ClayEngineHeadless", "ClayEngineHeadless\ClayEngineHeadless.vcxproj", "{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,20 +46,22 @@ Global
 		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Release|x64.Build.0 = Release|x64
 		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Release|x86.ActiveCfg = Release|x64
 		{421E378A-7206-4FC2-9B03-5A5FD381CDC9}.Release|x86.Build.0 = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.ActiveCfg = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.Build.0 = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x86.ActiveCfg = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x86.Build.0 = Debug|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.ActiveCfg = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.Build.0 = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.ActiveCfg = Release|x64
+		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.Build.0 = Release|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x64.ActiveCfg = Debug|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x64.Build.0 = Debug|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x86.ActiveCfg = Debug|x64
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Debug|x86.Build.0 = Debug|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x64.ActiveCfg = Release|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x64.Build.0 = Release|x64
 		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x86.ActiveCfg = Release|x64
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.ActiveCfg = Debug|x64
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x64.Build.0 = Debug|x64
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x86.ActiveCfg = Debug|Win32
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Debug|x86.Build.0 = Debug|Win32
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.ActiveCfg = Release|x64
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x64.Build.0 = Release|x64
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.ActiveCfg = Release|Win32
-		{E0B52AE7-E160-4D32-BF3F-910B785E5A8E}.Release|x86.Build.0 = Release|Win32
+		{1BAF3169-8C36-4FDC-BE9A-D6F59EE38494}.Release|x86.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

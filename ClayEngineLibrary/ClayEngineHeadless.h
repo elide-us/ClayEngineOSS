@@ -1,27 +1,30 @@
+#pragma once
 /******************************************************************************/
 /*                                                                            */
 /* ClayEngineOSS (C) 2024 Elideus                                             */
-/* Basic engine server demonstrating entry point setup                        */
+/*               */
 /* https://github.com/elide-us                                                */
 /*                                                                            */
 /******************************************************************************/
 
-#include "pch.h"
-#include "ClayEngine.h"
+#include "Strings.h"
+#include "Services.h"
 
-namespace
+namespace ClayEngine
 {
-	ClayEngine::ClayHeadlessPtr g_bootstrap = nullptr;
-}
+	class ClayEngineHeadless
+		: public ThreadExtension
+	{
+		AffinityData m_affinity_data;
 
-int wmain(int argc, wchar_t* argv[])
-{
-	UNREFERENCED_PARAMETER(argc);
-	UNREFERENCED_PARAMETER(argv);
+	public:
+		ClayEngineHeadless(Affinity pRoot);
+		~ClayEngineHeadless();
 
-	g_bootstrap = std::make_unique<ClayEngine::ClayHeadless>();
-	g_bootstrap->Run();
-	g_bootstrap.reset();
+		void SetContextAffinity(Affinity affinity);
+		const AffinityData& GetAffinityData() const;
+	};
+	using ClayEngineHeadlessPtr = std::unique_ptr<ClayEngineHeadless>;
 
-	return 0;
+	using HeadlessMap = std::map<String, ClayEngineHeadlessPtr>;
 }
