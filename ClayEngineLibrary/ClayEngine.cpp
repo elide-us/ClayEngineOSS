@@ -11,19 +11,15 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 	if (!DirectX::XMVerifyCPUSupport()) throw std::exception("ClayEngine CRITICAL: CPU Unsupported");
 	if (FAILED(CoInitializeEx(nullptr, COINITBASE_MULTITHREADED))) throw std::exception("ClayEngine CRITICAL: Failed to Initialize COM");
 
-	m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
-
-#ifdef _DEBUG
 	if (AllocConsole())
 	{
 		FILE* file = nullptr;
 		_wfreopen_s(&file, L"CONIN$", L"r", stdin);
 		_wfreopen_s(&file, L"CONOUT$", L"w", stdout);
 		_wfreopen_s(&file, L"CONOUT$", L"w", stderr);
-		WriteLine("ClayEngine INFO: Allocated default console");
 	}
-	else WriteLine("ClayEngine WARNING: Failed to allocate default console");
-#endif
+
+	m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
 
 	// Intentionally hard-coded, this is your default startup file
 	m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_json);
@@ -51,31 +47,28 @@ void ClayEngine::ClayEngine::Run()
 		{
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
-			
+
 			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
 		}
 
 		if (_type == "server")
 		{
-			WriteLine("Implement ClayEngine GUI Server here");
-		}
+			auto _title = element["title"].get<std::string>();
+			auto _class = element["class"].get<std::string>();
 
-		if (_type == "headless")
-		{
-			WriteLine("Implement ClayEngine Service Server here");
+			// m_servers.emplace(...
 		}
 	}
 
 	// Start the std::cin parser for flow control
-	bool _run = true;
-	while (_run)
+	while (run)
 	{
 		Unicode _input;
 		std::wcin >> _input;
 
 		if (_input == L"quit")
 		{
-			_run = false;
+			run = false;
 			std::cout << "Beginning system shutdown, press ENTER to exit..." << std::endl;
 		}
 	}

@@ -47,7 +47,7 @@ namespace ClayEngine
 	/// </summary>
 	struct TickMachine
 	{
-		void operator()(Future future);
+		void operator()(FUTURE future);
 	};
 
 	/// <summary>
@@ -98,8 +98,8 @@ namespace ClayEngine
 	{
 		AffinityData m_affinity_data = {};
 
-		Thread m_thread;
-		Promise m_promise = {};
+		THREAD m_thread;
+		PROMISE m_promise = {};
 
 		RenderSystemRaw m_rs = nullptr;
 

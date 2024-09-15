@@ -16,6 +16,7 @@
 namespace ClayEngine
 {
 	constexpr auto c_bootstrap_json = "clayengine.json";
+	constexpr auto c_bootstrap_headless_json = "clayheadless.json";
 
 	using Document = nlohmann::json;
 

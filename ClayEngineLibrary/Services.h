@@ -33,10 +33,10 @@ namespace ClayEngine
 	using Type = std::type_index;
 	using Object = void*;
 
-	using Future = std::future<void>;
-	using Promise = std::promise<void>;
+	using FUTURE = std::future<void>;
+	using PROMISE = std::promise<void>;
 
-	using Thread = std::thread;
+	using THREAD = std::thread;
 	using Affinity = std::thread::id;
 
 	using ServicesMap = std::map<Type, Object>;
@@ -231,8 +231,8 @@ namespace ClayEngine
 	class ThreadExtension
 	{
 	protected:
-		Promise m_promise = {};
-		Thread m_thread;
+		PROMISE m_promise = {};
+		THREAD m_thread;
 	public:
 		~ThreadExtension()
 		{

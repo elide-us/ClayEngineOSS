@@ -2,7 +2,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* ClayEngineOSS (C) 2024 Elideus                                             */
-/* ClientCore header provides context objects for client windows              */
+/*            */
 /* https://github.com/elide-us                                                */
 /*                                                                            */
 /******************************************************************************/

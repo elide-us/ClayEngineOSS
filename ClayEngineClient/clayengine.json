@@ -1,7 +1,9 @@
 {
   "startup": [
     {
+      "address": "127.0.0.1",
       "class": "client01",
+      "port": "19740",
       "title": "ClayEngine Test Client 01",
       "type": "client"
     }

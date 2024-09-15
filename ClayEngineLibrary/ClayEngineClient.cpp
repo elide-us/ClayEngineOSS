@@ -2,7 +2,7 @@
 #include "ClayEngineClient.h"
 
 #include "WindowSystem.h"
-#include "InputSystem.h"
+//#include "InputSystem.h"
 //#include "TimingSystem.h"
 #include "ContentSystem.h"
 //#include "RenderSystem.h"
@@ -16,7 +16,7 @@ namespace ClayEngine
     /// </summary>
     struct ClayEngineClientEntryPoint
     {
-        int operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, Future future, ClayEngineClientRaw context);
+        int operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClientRaw context);
     };
 }
 #pragma endregion
@@ -26,13 +26,15 @@ ClayEngine::ClayEngineClient::ClayEngineClient(HINSTANCE hInstance, Affinity pRo
     : m_instance_handle(hInstance)
 {
     m_affinity_data.root_thread = pRoot;
-    m_thread = std::thread{ ClayEngineClientEntryPoint(), hInstance, m_show_flags, className, windowName, std::move(m_promise.get_future()), this };
+
+    m_thread = THREAD{ ClayEngineClientEntryPoint(), hInstance, m_show_flags, className, windowName, std::move(m_promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineClient::~ClayEngineClient()
 {
     m_promise.set_value();
-    m_thread.join();
+    if (m_thread.joinable())
+        m_thread.join();
 }
 
 void ClayEngine::ClayEngineClient::SetContextAffinity(Affinity affinity)
@@ -47,7 +49,7 @@ const ClayEngine::AffinityData& ClayEngine::ClayEngineClient::GetAffinityData() 
 #pragma endregion
 
 #pragma region ClayEngineClientEntryPoint Definition
-int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, Future future, ClayEngineClientRaw context)
+int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClientRaw context)
 {
     context->SetContextAffinity(std::this_thread::get_id());
     auto _affinity = context->GetAffinityData();
@@ -57,13 +59,13 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
     
     //TODO: The InputSystem may not be functioning fully as the InputHandler is a static class that probably needs to be reworked
-    auto _input = Services::MakeService<InputSystem>(_affinity);
+    //auto _input = Services::MakeService<InputSystem>(_affinity);
 
 
     auto _resources = Services::MakeService<DX11Resources>(_affinity);
     auto _content = Services::MakeService<ContentSystem>(_affinity);
 
-    auto _network = std::make_unique<Experimental::AsyncNetworkSystem>(L"127.0.0.1", L"19740");
+    auto _network = std::make_unique<AsyncNetworkTestClient>();
 
     //TODO: The TimingSystem hasn't been tested or refactored yet
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);

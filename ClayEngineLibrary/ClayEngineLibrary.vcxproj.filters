@@ -8,9 +8,6 @@
     <ClCompile Include="DX11DeviceFactory.cpp">
       <Filter>Private\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="ClayEngineClient.cpp">
-      <Filter>Private\Systems</Filter>
-    </ClCompile>
     <ClCompile Include="WindowSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
@@ -38,8 +35,11 @@
     <ClCompile Include="AsyncNetworkSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="NetworkSystem.cpp">
-      <Filter>Private\Systems</Filter>
+    <ClCompile Include="ClayEngineHeadless.cpp">
+      <Filter>Private</Filter>
+    </ClCompile>
+    <ClCompile Include="ClayEngineClient.cpp">
+      <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,9 +58,6 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="DX11DeviceFactory.h">
       <Filter>Public\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="ClayEngineClient.h">
-      <Filter>Public\Systems</Filter>
     </ClInclude>
     <ClInclude Include="WindowSystem.h">
       <Filter>Public\Systems</Filter>
@@ -87,8 +84,11 @@
     <ClInclude Include="AsyncNetworkSystem.h">
       <Filter>Public\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkSystem.h">
-      <Filter>Public\Systems</Filter>
+    <ClInclude Include="ClayEngineHeadless.h">
+      <Filter>Public</Filter>
+    </ClInclude>
+    <ClInclude Include="ClayEngineClient.h">
+      <Filter>Public</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -118,8 +118,5 @@
     <Filter Include="Public\Systems">
       <UniqueIdentifier>{59c08fee-d9d5-4e82-adea-05992240bd9c}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
 </Project>
