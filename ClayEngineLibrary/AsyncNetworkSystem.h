@@ -2,15 +2,6 @@
 
 #include "Services.h"
 
-#include <thread>
-#include <future>
-#include <mutex>
-#include <chrono>
-#include <vector>
-#include <list>
-#include <string>
-#include <memory>
-
 //	constexpr auto c_service_threads = 10UL; // 5x Send, 5x Recv
 
 //	#define OP_WSA_ACCEPT 1
@@ -36,6 +27,10 @@ namespace ClayEngine
 	constexpr auto c_listen_hint_protocol = IPPROTO_TCP;
 	constexpr auto c_listen_server_address = L"127.0.0.1";
 	constexpr auto c_listen_server_port = L"19740";
+
+	constexpr DWORD c_dwReceiveDataLength = 64;
+	constexpr DWORD c_dwLocalAddressLength = sizeof(SOCKADDR_IN) + 16;
+	constexpr DWORD c_dwRemoteAddressLength = sizeof(SOCKADDR_IN) + 16;
 	
 	class AsyncNetworkSystem;
 	class AsyncListenServerModule;

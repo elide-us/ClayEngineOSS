@@ -1,112 +1,6 @@
 #include "pch.h"
 #include "AsyncNetworkSystem.h"
 
-#pragma region Async Listen Server Functor Implementation
-struct ClayEngine::AsyncListenServerWorker
-{
-    THREAD Thread;
-    PROMISE Promise = {};
-};
-
-void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListenServerModule* context)
-{
-	while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
-    {
-        if (!context) continue;
-
-        AsyncListenServerModule::AcceptSocketData* opData = nullptr;
-        bool isAcceptDataReady = false;
-
-        if (!isAcceptDataReady)
-        {
-            // Create a AcceptSocketData
-            if (!opData)
-                opData = context->MakeAcceptSocketData(64);
-            else
-                opData->Reset();
-
-            // Create a new socket
-            opData->Socket = WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-            if (opData->Socket == INVALID_SOCKET)
-            {
-                throw std::runtime_error("Failed to create a new socket");
-            }
-
-            // Associate the socket with the completion port
-            if (CreateIoCompletionPort(reinterpret_cast<HANDLE>(opData->Socket), context->GetListenQueue(), reinterpret_cast<ULONG_PTR>(opData), 0) == NULL)
-            {
-                closesocket(opData->Socket);
-                throw std::runtime_error("Failed to associate the socket with the completion port");
-            }
-
-            // Run AcceptEx to start accepting connections asynchronously
-            DWORD bytesReceived = 0;
-            BOOL result = context->GetAcceptExFunction()(
-                context->GetListenSocket(),
-                opData->Socket,
-                &opData->Buffer,
-                opData->BufferLength,
-                sizeof(SOCKADDR_IN) + 16, // Size of local address buffer
-                sizeof(SOCKADDR_IN) + 16, // Size of remote address buffer
-                &bytesReceived,
-                &opData->Overlapped // Overlapped structure to be notified when the operation completes
-                );
-
-            if (!result && WSAGetLastError() != WSA_IO_PENDING)
-            {
-                // Handle AcceptEx failure
-                closesocket(opData->Socket);
-                throw std::runtime_error("Failed to post AcceptEx");
-            }
-
-            isAcceptDataReady = true;
-        }
-
-        // Loop to wait for incoming connections using GetQueuedCompletionStatus 
-        DWORD bytesTransferred;
-        ULONG_PTR completionKey; // I expect this to be the handle to the listen queue
-        LPOVERLAPPED overlapped; // Should == opData
-        if (GetQueuedCompletionStatus(context->GetListenQueue(), &bytesTransferred, &completionKey, &overlapped, INFINITE))
-        {
-            // Cast the overlapped structure back to AcceptSocketData to retrieve connection details
-            auto completedOpData = reinterpret_cast<AsyncListenServerModule::AcceptSocketData*>(overlapped);
-
-            if (opData != completedOpData) throw;
-
-            auto fn = context->GetAcceptExSockAddrsFunction();
-
-            // Retrieve local and remote addresses (assumes buffers for AcceptEx are set correctly)
-            SOCKADDR* localAddr = nullptr;
-            SOCKADDR* remoteAddr = nullptr;
-            int localAddrLen = 0;
-            int remoteAddrLen = 0;
-            fn(completedOpData->Buffer, completedOpData->BufferLength,
-                sizeof(SOCKADDR_IN) + 16, sizeof(SOCKADDR_IN) + 16,
-                &localAddr, &localAddrLen,
-                &remoteAddr, &remoteAddrLen
-            );
-
-            // Set socket options as needed
-            //setsockopt(completedOpData->Socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&ans->GetListenSocket(), sizeof(ans->GetListenSocket()));
-
-            // Create ClientConnectionData to handle the newly accepted client
-			auto remoteAddrIn = reinterpret_cast<SOCKADDR_IN*>(remoteAddr);
-			// Above call throws a null ptr exception for remoteAddr
-
-            context->MakeClientConnectionData(completedOpData->Socket, std::move(localAddr), std::move(remoteAddrIn));
-
-            isAcceptDataReady = false;
-        }
-        else
-        {
-            continue;
-        }
-        
-        if (opData) context->FreeAcceptSocketData(opData);
-    }
-}
-#pragma endregion
-
 #pragma region Async Listen Server Module - Accept Socket Data Implementation
 struct ClayEngine::AsyncListenServerModule::AcceptSocketData
 {
@@ -139,6 +33,112 @@ void ClayEngine::AsyncListenServerModule::AcceptSocketData::Reset()
     ClayMemZero(&Overlapped, sizeof(OVERLAPPED));
     Socket = INVALID_SOCKET;
     ClayMemZero(&Buffer, BufferLength);
+}
+#pragma endregion
+
+#pragma region Async Listen Server Functor Implementation
+struct ClayEngine::AsyncListenServerWorker
+{
+    THREAD Thread;
+    PROMISE Promise = {};
+};
+
+void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListenServerModule* context)
+{
+    const DWORD bufferLength = c_dwReceiveDataLength + c_dwLocalAddressLength + c_dwRemoteAddressLength;
+
+	while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
+    {
+        if (!context) continue;
+
+        AsyncListenServerModule::AcceptSocketData* opData = nullptr;
+        bool isAcceptDataReady = false;
+
+        if (!isAcceptDataReady)
+        {
+            // Create a AcceptSocketData
+            if (!opData)
+                opData = context->MakeAcceptSocketData(bufferLength);
+            else
+                opData->Reset();
+
+            opData->BufferLength = bufferLength;
+
+            // Create a new socket
+            opData->Socket = WSASocketW(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+            if (opData->Socket == INVALID_SOCKET)
+            {
+                throw std::runtime_error("Failed to create a new socket");
+            }
+
+            // Associate the socket with the completion port
+            if (CreateIoCompletionPort(reinterpret_cast<HANDLE>(opData->Socket), context->GetListenQueue(), reinterpret_cast<ULONG_PTR>(opData), 0) == NULL)
+            {
+                closesocket(opData->Socket);
+                throw std::runtime_error("Failed to associate the socket with the completion port");
+            }
+
+            // Run AcceptEx to start accepting connections asynchronously
+            DWORD bytesReceived = 0;
+            BOOL result = context->GetAcceptExFunction()(
+                context->GetListenSocket(),
+                opData->Socket,
+                opData->Buffer,
+                c_dwReceiveDataLength,
+                c_dwLocalAddressLength, // Size of local address buffer
+                c_dwRemoteAddressLength, // Size of remote address buffer
+                &bytesReceived,
+                &opData->Overlapped // Overlapped structure to be notified when the operation completes
+                );
+
+            if (!result && WSAGetLastError() != WSA_IO_PENDING)
+            {
+                // Handle AcceptEx failure
+                closesocket(opData->Socket);
+                throw std::runtime_error("Failed to post AcceptEx");
+            }
+
+            isAcceptDataReady = true;
+        }
+
+        // Loop to wait for incoming connections using GetQueuedCompletionStatus 
+        DWORD bytesTransferred;
+        ULONG_PTR completionKey; // I expect this to be the handle to the listen queue
+        LPOVERLAPPED overlapped; // Should == opData
+        if (GetQueuedCompletionStatus(context->GetListenQueue(), &bytesTransferred, &completionKey, &overlapped, INFINITE))
+        {
+            // Cast the overlapped structure back to AcceptSocketData to retrieve connection details
+            auto completedOpData = reinterpret_cast<AsyncListenServerModule::AcceptSocketData*>(overlapped);
+
+            if (opData != completedOpData) throw;;
+
+            // Retrieve local and remote addresses (assumes buffers for AcceptEx are set correctly)
+            SOCKADDR* localAddr = nullptr;
+            SOCKADDR* remoteAddr = nullptr;
+            int localAddrLen = 0;
+            int remoteAddrLen = 0;
+            context->GetAcceptExSockAddrsFunction()(completedOpData->Buffer, c_dwReceiveDataLength,
+                c_dwLocalAddressLength, c_dwRemoteAddressLength,
+                &localAddr, &localAddrLen,
+                &remoteAddr, &remoteAddrLen
+            );
+
+            // Set socket options as needed
+            //setsockopt(completedOpData->Socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char*)&ans->GetListenSocket(), sizeof(ans->GetListenSocket()));
+
+            // Create ClientConnectionData to handle the newly accepted client
+			auto remoteAddrIn = reinterpret_cast<SOCKADDR_IN*>(remoteAddr);
+            context->MakeClientConnectionData(completedOpData->Socket, localAddr, remoteAddrIn);
+
+            isAcceptDataReady = false;
+        }
+        else
+        {
+            continue;
+        }
+        
+        if (opData) context->FreeAcceptSocketData(opData);
+    }
 }
 #pragma endregion
 
@@ -354,6 +354,9 @@ void ClayEngine::AsyncNetworkSystem::MakeClientConnectionData(SOCKET socket, SOC
 {
     LockGuard lock(m_client_connections_mutex);
 
+    WriteLine(L"Added Client Socket");
+
     m_client_connections.emplace_back(std::make_unique<ClientConnectionData>(socket, local, remote));
 }
 #pragma endregion
+
