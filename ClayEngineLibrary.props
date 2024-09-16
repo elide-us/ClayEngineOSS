@@ -20,6 +20,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link />
+    <Link />
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>

@@ -22,6 +22,8 @@
 
 #include "Strings.h"
 
+#define ClayMemZero(Address, Length) memset(Address, 0, Length)
+
 namespace ClayEngine
 {
 	struct AffinityData
@@ -35,6 +37,9 @@ namespace ClayEngine
 
 	using FUTURE = std::future<void>;
 	using PROMISE = std::promise<void>;
+
+	using MUTEX = std::mutex;
+	using LockGuard = std::lock_guard<MUTEX>;
 
 	using THREAD = std::thread;
 	using Affinity = std::thread::id;
