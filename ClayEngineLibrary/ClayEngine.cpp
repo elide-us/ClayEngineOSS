@@ -11,32 +11,11 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 	if (!DirectX::XMVerifyCPUSupport()) throw std::exception("ClayEngine CRITICAL: CPU Unsupported");
 	if (FAILED(CoInitializeEx(nullptr, COINITBASE_MULTITHREADED))) throw std::exception("ClayEngine CRITICAL: Failed to Initialize COM");
 
-	if (AllocConsole())
-	{
-		FILE* file = nullptr;
-		_wfreopen_s(&file, L"CONIN$", L"r", stdin);
-		_wfreopen_s(&file, L"CONOUT$", L"w", stdout);
-		_wfreopen_s(&file, L"CONOUT$", L"w", stderr);
-	}
-
 	m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
 
 	// Intentionally hard-coded, this is your default startup file
 	m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_json);
 
-	m_device = Services::MakeService<DX11DeviceFactory>(m_affinity_data);
-}
-
-ClayEngine::ClayEngine::~ClayEngine()
-{
-	m_bootstrap.reset();
-
-	FreeConsole();
-	CoUninitialize();
-}
-
-void ClayEngine::ClayEngine::Run()
-{
 	auto doc = m_bootstrap->GetDocument();
 	auto& startup = doc["startup"];
 	for (auto& element : startup)
@@ -47,6 +26,8 @@ void ClayEngine::ClayEngine::Run()
 		{
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
+			//auto _address = element["address"].get<std::string>();
+			//auto _port = element["port"].get<std::string>();
 
 			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
 		}
@@ -55,28 +36,44 @@ void ClayEngine::ClayEngine::Run()
 		{
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
+			//auto _address = element["address"].get<std::string>();
+			//auto _port = element["port"].get<std::string>();
 
-			// m_servers.emplace(...
+			m_servers.emplace(_class, std::make_unique<ClayEngineServer>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
+		}
+
+		if (_type == "headless")
+		{
+			auto _class = element["class"].get<std::string>();
+			//auto _address = element["address"].get<std::string>();
+			//auto _port = element["port"].get<std::string>();
+
+			m_headless.emplace(_class, std::make_unique<ClayEngineHeadless>(m_affinity_data.root_thread, ToUnicode(_class)));
 		}
 	}
 
-	// Start the std::cin parser for flow control
-	while (run)
-	{
-		Unicode _input;
-		std::wcin >> _input;
+	m_device = Services::MakeService<DX11DeviceFactory>(m_affinity_data);
+}
 
-		if (_input == L"quit")
-		{
-			run = false;
-			std::cout << "Beginning system shutdown, press ENTER to exit..." << std::endl;
-		}
+ClayEngine::ClayEngine::~ClayEngine()
+{
+	for (auto& element : m_headless)
+	{
+		element.second.reset();
+	}
+
+	for (auto& element : m_servers)
+	{
+		element.second.reset();
 	}
 
 	for (auto& element : m_clients)
 	{
 		element.second.reset();
 	}
+
+	m_bootstrap.reset();
+	CoUninitialize();
 }
 
 #pragma region Orphaned Code Fragments

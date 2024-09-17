@@ -6,6 +6,19 @@
       "port": "19740",
       "title": "ClayEngine Test Client 01",
       "type": "client"
+    },
+    {
+      "address": "127.0.0.1",
+      "class": "headless01",
+      "port": "19740",
+      "type": "headless"
+    },
+    {
+      "address": "127.0.0.1",
+      "class": "server01",
+      "port": "19740",
+      "title": "ClayEngine Test Server 01",
+      "type": "server"
     }
   ]
 }

@@ -14,9 +14,7 @@
 #include "Storage.h" // Filesystem and JSON parsing
 
 #include "DX11DeviceFactory.h"
-#include "ClayEngineClient.h"
-#include "ClayEngineHeadless.h"
-
+#include "ClayEngineContext.h"
 
 namespace ClayEngine
 {
@@ -26,8 +24,6 @@ namespace ClayEngine
 	/// </summary>
 	class ClayEngine
 	{
-		bool run = true;
-
 		HINSTANCE m_hInstance; // This is the HANDLE to the process
 		LPWSTR m_cmdLine; // The command line from the OS
 		UINT m_cmdShow; // The window display flags, eg. SW_SHOWDEFAULT
@@ -39,76 +35,23 @@ namespace ClayEngine
 		DX11DeviceFactoryPtr m_device = nullptr; // Universal scope hardware device factory, includes feature interrogation
 
 		ClientMap m_clients = {};
+		ServerMap m_servers = {};
+		HeadlessMap m_headless = {};
 
 	public:
 		ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale);
 		~ClayEngine();
 
-		void Run();
-		void SetExit() { run = false; }
-	};
-	using ClayEnginePtr = std::unique_ptr<ClayEngine>;
-	using ClayEngineRaw = ClayEngine*;
-
-	// Might be used for things like authentication, gateway/egress network routing servers, dedicated chat/messenger, etc.
-	class ClayHeadless
-	{
-		JsonFilePtr m_bootstrap = {}; // Loads clayengine.json
-
-		AffinityData m_affinity_data = {}; // Universal scope (parent of all) affinity data. this_thread = root_thread
-
-		HeadlessMap m_headless = {};
-
-	public:
-		ClayHeadless()
-		{
-			m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
-
-			m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_headless_json);
-		}
-		~ClayHeadless()
-		{
-			FreeConsole();
-		}
-
 		void Run()
 		{
-			auto doc = m_bootstrap->GetDocument();
-			auto& startup = doc["startup"];
-			for (auto& element : startup)
+			while (!m_clients.empty() || !m_servers.empty() || !m_headless.empty())
 			{
-				auto _type = element["type"].get<std::string>();
-
-				if (_type == "headless")
-				{
-					auto _class = element["class"].get<std::string>();
-					auto _port = element["port"].get<std::string>();
-					auto _address = element["address"].get<std::string>();
-
-					m_headless.emplace(_class, std::make_unique<ClayEngineHeadless>(m_affinity_data.root_thread));
-				}
+				bool unreferencedParameter = false;
+				UNREFERENCED_PARAMETER(unreferencedParameter);
 			}
-
-			bool _run = true;
-			while (_run)
-			{
-				Unicode _input;
-				std::wcin >> _input;
-
-				if (_input == L"quit")
-				{
-					_run = false;
-					std::cout << "Beginning system shutdown, press ENTER to exit..." << std::endl;
-				}
-			}
-
-			for (auto& element : m_headless)
-			{
-				element.second.reset();
-			}
-		};
+		}
 	};
-	using ClayHeadlessPtr = std::unique_ptr<ClayHeadless>;
+	using ClayEnginePtr = std::unique_ptr<ClayEngine>;
 
 #pragma region Orphaned Code Fragments
 	//#define _USE_MATH_DEFINES

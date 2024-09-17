@@ -44,6 +44,7 @@
 #include <WinSock2.h>
 #include <MSWSock.h>
 #include <WS2tcpip.h>
+#include <Mstcpip.h>
 
 #define _XM_NO_XMVECTOR_OVERLOADS_
 #include <d3d11_1.h>

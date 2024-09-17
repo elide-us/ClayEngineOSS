@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Strings.h"
 #include "Services.h"
 
 //	constexpr auto c_service_threads = 10UL; // 5x Send, 5x Recv
@@ -14,9 +15,16 @@
 
 //	using Milliseconds = std::chrono::milliseconds;
 
-
 namespace ClayEngine
 {
+	int ProcessWSALastError();
+
+	#pragma region Async Data Server Module Declarations
+	constexpr auto c_data_workers = 20UL; // 10x Send, 10x Recv
+
+
+	#pragma endregion
+
 	#pragma region Async Listen Server Module Declarations
 	// Defaults for Listen Server Socket and Worker Threads
 	constexpr auto c_listen_workers = 4UL;
@@ -28,7 +36,7 @@ namespace ClayEngine
 	constexpr auto c_listen_server_address = L"127.0.0.1";
 	constexpr auto c_listen_server_port = L"19740";
 
-	constexpr DWORD c_dwReceiveDataLength = 64;
+	constexpr DWORD c_dwReceiveDataLength = sizeof(GUID); // We get a GUID from the client
 	constexpr DWORD c_dwLocalAddressLength = sizeof(SOCKADDR_IN) + 16;
 	constexpr DWORD c_dwRemoteAddressLength = sizeof(SOCKADDR_IN) + 16;
 	
@@ -89,6 +97,23 @@ namespace ClayEngine
 	using AsyncListenServerModulePtr = std::unique_ptr<AsyncListenServerModule>;
 	#pragma endregion
 
+	#pragma region Client Connection Module Declarations
+	class ClientConnectionModule
+	{
+		SOCKET m_socket = INVALID_SOCKET;
+		
+		ADDRINFOW* m_pAddrInfo = nullptr;
+		SOCKADDR_IN m_sockAddr = {};
+
+		bool tryConnectToServer();
+
+	public:
+		ClientConnectionModule(Unicode address, Unicode port);
+		~ClientConnectionModule();
+	};
+	using ClientConnectionModulePtr = std::unique_ptr<ClientConnectionModule>;
+	#pragma endregion
+
 	class AsyncNetworkSystem
 	{
 	public:
@@ -132,6 +157,8 @@ namespace ClayEngine
 	public:
 		AsyncNetworkTestClient()
 		{
+			if (FAILED(CoInitializeEx(NULL, COINIT_MULTITHREADED))) throw;
+
 			addrinfo* ptr = nullptr;
 
 			const char* sendbuf = "Hello, Server!";
@@ -200,6 +227,8 @@ namespace ClayEngine
 		{
 			closesocket(m_socket);
 			WSACleanup();
+			CoUninitialize();
+
 		}
 	};
 }

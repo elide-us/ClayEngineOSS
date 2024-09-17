@@ -90,8 +90,7 @@
   <ItemGroup>
     <ClInclude Include="AsyncNetworkSystem.h" />
     <ClInclude Include="ClayEngine.h" />
-    <ClInclude Include="ClayEngineClient.h" />
-    <ClInclude Include="ClayEngineHeadless.h" />
+    <ClInclude Include="ClayEngineContext.h" />
     <ClInclude Include="ContentSystem.h" />
     <ClInclude Include="DX11DeviceFactory.h" />
     <ClInclude Include="DX11Resources.h" />
@@ -109,8 +108,7 @@
   <ItemGroup>
     <ClCompile Include="AsyncNetworkSystem.cpp" />
     <ClCompile Include="ClayEngine.cpp" />
-    <ClCompile Include="ClayEngineClient.cpp" />
-    <ClCompile Include="ClayEngineHeadless.cpp" />
+    <ClCompile Include="ClayEngineContext.cpp" />
     <ClCompile Include="ContentSystem.cpp" />
     <ClCompile Include="DX11DeviceFactory.cpp" />
     <ClCompile Include="DX11Resources.cpp" />
