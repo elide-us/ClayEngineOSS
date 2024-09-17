@@ -409,12 +409,13 @@ ClayEngine::AsyncNetworkSystem::ClientConnectionData::~ClientConnectionData()
 #pragma endregion
 
 #pragma region Async Network System Implementation
-ClayEngine::AsyncNetworkSystem::AsyncNetworkSystem(AffinityData affinityData)
+ClayEngine::AsyncNetworkSystem::AsyncNetworkSystem(AffinityData affinityData, Unicode className, Document document)
     : m_affinity_data(affinityData)
 {
     if (FAILED(WSAStartup(MAKEWORD(2, 2), &m_wsaData))) throw std::runtime_error("WSAStartup() failed... WTF?");
 
     //TODO: Read json and configure as defined
+
 
     try
     {
@@ -450,9 +451,10 @@ void ClayEngine::AsyncNetworkSystem::MakeClientConnectionData(SOCKET socket, SOC
 }
 #pragma endregion
 
+#pragma region Client Connection Module Implementation
 bool ClayEngine::ClientConnectionModule::tryConnectToServer()
 {
-	if (connect(m_socket, reinterpret_cast<SOCKADDR*>(&m_sockAddr), sizeof(SOCKADDR)) == SOCKET_ERROR)
+	if (connect(m_socket, reinterpret_cast<SOCKADDR*>(&m_remote_sockaddr), sizeof(SOCKADDR)) == SOCKET_ERROR)
 	{
 		auto rc = ProcessWSALastError();
 		if (rc != WSAEWOULDBLOCK) return false;
@@ -461,7 +463,7 @@ bool ClayEngine::ClientConnectionModule::tryConnectToServer()
     return true;
 }
 
-ClayEngine::ClientConnectionModule::ClientConnectionModule(Unicode address, Unicode port)
+ClayEngine::ClientConnectionModule::ClientConnectionModule()
 {
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -478,13 +480,13 @@ ClayEngine::ClientConnectionModule::ClientConnectionModule(Unicode address, Unic
     if (ioctlsocket(m_socket, FIONBIO, &iMode) == SOCKET_ERROR) throw;
 
     // Convert address to network address
-    if (FAILED(InetPtonW(hints.ai_family, address.c_str(), &m_sockAddr.sin_addr.s_addr))) throw;
+    if (FAILED(InetPtonW(hints.ai_family, address.c_str(), &m_remote_sockaddr.sin_addr.s_addr))) throw;
     
     // Convert port to network port
-    m_sockAddr.sin_port = htons(static_cast<u_short>(std::stoi(port.c_str())));
+    m_remote_sockaddr.sin_port = htons(static_cast<u_short>(std::stoi(port.c_str())));
     
 	// Set the address family
-    m_sockAddr.sin_family = ADDRESS_FAMILY(hints.ai_family);
+    m_remote_sockaddr.sin_family = ADDRESS_FAMILY(hints.ai_family);
 
 
     while (!tryConnectToServer())
@@ -501,3 +503,5 @@ ClayEngine::ClientConnectionModule::~ClientConnectionModule()
     closesocket(m_socket);
     WSACleanup();
 }
+#pragma endregion
+

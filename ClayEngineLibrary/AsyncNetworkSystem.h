@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Strings.h"
+#include "Storage.h"
 #include "Services.h"
 
 //	constexpr auto c_service_threads = 10UL; // 5x Send, 5x Recv
@@ -40,17 +41,16 @@ namespace ClayEngine
 	constexpr DWORD c_dwLocalAddressLength = sizeof(SOCKADDR_IN) + 16;
 	constexpr DWORD c_dwRemoteAddressLength = sizeof(SOCKADDR_IN) + 16;
 	
-	class AsyncNetworkSystem;
-	class AsyncListenServerModule;
-
 	struct AsyncListenServerWorker;
 	using AsyncListenServerWorkers = std::vector<AsyncListenServerWorker>;
 	
+	class AsyncListenServerModule;
 	struct AsyncListenServerFunctor
 	{
 		void operator()(FUTURE future, AsyncListenServerModule* context);
 	};
 
+	class AsyncNetworkSystem;
 	class AsyncListenServerModule
 	{
 	public:
@@ -98,21 +98,46 @@ namespace ClayEngine
 	#pragma endregion
 
 	#pragma region Client Connection Module Declarations
+
+	struct ClientConnectionWorker;
+	using ClientConnectionWorkers = std::vector<ClientConnectionWorker>;
+
+	class ClientConnectionModule;
+	struct ClientConnectionFunctor
+	{
+		void operator()(FUTURE future, ClientConnectionModule* context);
+	};
+
+
+
 	class ClientConnectionModule
 	{
 		SOCKET m_socket = INVALID_SOCKET;
 		
-		ADDRINFOW* m_pAddrInfo = nullptr;
-		SOCKADDR_IN m_sockAddr = {};
+		ADDRINFOW m_hints = {}; // Socket configuration
+		ADDRINFOW* m_local_addrinfo = nullptr; // Returned local address list header
+
+		SOCKADDR_IN m_remote_sockaddr = {}; // Connected remote socket address information
 
 		bool tryConnectToServer();
 
 	public:
-		ClientConnectionModule(Unicode address, Unicode port);
+		ClientConnectionModule();
 		~ClientConnectionModule();
+
+		void ConnectToServer(Unicode address, Unicode port);
+		void DisconnectServer();
+
+		void SendData(const CHAR* data, DWORD length);
+
+		void OnDataReceived(const CHAR* data, DWORD length);
 	};
 	using ClientConnectionModulePtr = std::unique_ptr<ClientConnectionModule>;
-	#pragma endregion
+	
+
+
+
+#pragma endregion
 
 	class AsyncNetworkSystem
 	{
@@ -123,10 +148,14 @@ namespace ClayEngine
 
 	private:
 		AffinityData m_affinity_data = {};
+		Unicode m_class_name = {};
+		Document m_document = {};
 
 		WSADATA m_wsaData = {};
 
 		AsyncListenServerModulePtr m_listen_server = nullptr;
+
+		ClientConnectionModulePtr m_client_connection = nullptr;
 
 		//AsyncDataTransferModulePtr m_data_transfer = nullptr;
 
@@ -134,7 +163,7 @@ namespace ClayEngine
 		ClientConnectionsData m_client_connections = {};
 
 	public:
-		AsyncNetworkSystem(AffinityData affinityData);
+		AsyncNetworkSystem(AffinityData affinityData, Unicode className, Document document);
 		~AsyncNetworkSystem();
 
 		void MakeClientConnectionData(SOCKET socket, SOCKADDR* local, SOCKADDR_IN* remote);
@@ -142,10 +171,7 @@ namespace ClayEngine
 	};
 	using AsyncNetworkSystemPtr = std::unique_ptr<AsyncNetworkSystem>;
 
-
-
-
-
+/*
 	class AsyncNetworkTestClient
 	{
 		WSADATA wsaData;
@@ -231,4 +257,5 @@ namespace ClayEngine
 
 		}
 	};
+*/
 }
