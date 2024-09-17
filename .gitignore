@@ -45,13 +45,8 @@ x64/
 *.recipe
 
 #ClayEngine
-Artifacts/
-DirectXTK/
-packages/
+/Artifacts
+/DirectXTK
+/DirectXTK12
 /ATGTK
 /UITK
-/ChatGPT_OLServer
-/ChatGPT_OLClient
-/DirectXTK12
-/include
-/OpenSource
