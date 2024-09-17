@@ -2,6 +2,168 @@
 #include "NetworkSystem.h"
 
 
+#pragma region Network Helpers
+int ClayEngine::Networking::ProcessWSALastError()
+{
+	switch (int rc = WSAGetLastError())
+	{
+	case WSAEWOULDBLOCK:
+		//WriteLine("WSA: Would Block");
+		return rc;
+	case WSAECONNABORTED:
+		WriteLine("WSA: Connection Aborted");
+		return rc;
+	case WSAECONNRESET:
+		WriteLine("WSA: Connection Reset");
+		return rc;
+	case WSAECONNREFUSED:
+		WriteLine("WSA: Connection Refused");
+		return rc;
+	case WSAETIMEDOUT:
+		WriteLine("WSA: Timed Out");
+		return rc;
+	case WSAEADDRINUSE:
+		WriteLine("WSA: Address In Use");
+		return rc;
+	case WSAENOTSOCK:
+		WriteLine("WSA: An operation was attempted on something that is not a socket.");
+		return rc;
+	case WSAEISCONN:
+		WriteLine("WSA: A connect request was made on an already conencted socket.");
+		return rc;
+	case WSAEADDRNOTAVAIL:
+		WriteLine("WSA: The requested address is not valid in its context.");
+		return rc;
+	case WSAEINVAL:
+		WriteLine("WSA: An invalid argument was supplied.");
+		return rc;
+	case WSAEFAULT:
+		WriteLine("WSA: The system detected an invalid pointer address in attempting to use a pointer argument in a call.");
+		return rc;
+	default:
+		std::stringstream ss;
+		ss << "WSA: Error code: " << rc;
+		WriteLine(ss.str());
+		return rc;
+	}
+}
+
+int ClayEngine::Networking::AddressResolver::WriteResolvedAddress(SOCKADDR* sa, int sa_length)
+{
+	char host[NI_MAXHOST];
+	int host_length = NI_MAXHOST;
+	char port[NI_MAXSERV];
+	int port_length = NI_MAXSERV;
+	int rc;
+
+	rc = getnameinfo(sa, sa_length, host, host_length, port, port_length, NI_NUMERICHOST | NI_NUMERICSERV);
+
+	if (rc != NO_ERROR)
+	{
+		std::stringstream ss;
+		ss << __FILE__ << ": getnameinfo failed: " << rc;
+		WriteLine(ss.str());
+
+		return rc;
+	}
+
+	if (strcmp(port, "0") == 0)
+	{
+		if (sa->sa_family == AF_INET)
+		{
+			std::stringstream ss;
+			ss << "Resolved Local Address: " << "[" << host << "]";
+			WriteLine(ss.str());
+		}
+		else
+		{
+			std::stringstream ss;
+			ss << "Resolved Local Address: " << host;
+			WriteLine(ss.str());
+		}
+	}
+	else
+	{
+		if (sa->sa_family == AF_INET)
+		{
+			std::stringstream ss;
+			ss << "Resolved Remote Address: " << "[" << host << "]:" << port;
+			WriteLine(ss.str());
+		}
+		else
+		{
+			std::stringstream ss;
+			ss << "Resolved Remote Address: " << host << ":" << port;
+			WriteLine(ss.str());
+		}
+	}
+
+	return rc;
+}
+
+ADDRINFO* ClayEngine::Networking::AddressResolver::ResolveAddress(String address, String port, int family, int socktype, int protocol)
+{
+	ADDRINFO hints = {};
+	ADDRINFO* head = nullptr;
+	int rc = 0;
+
+	hints.ai_flags = ((address.c_str()) ? 0 : AI_PASSIVE);
+	hints.ai_family = family;
+	hints.ai_socktype = socktype;
+	hints.ai_protocol = protocol;
+
+	rc = getaddrinfo(address.c_str(), port.c_str(), &hints, &head);
+	if (rc == WSANOTINITIALISED) return NULL;
+	//auto ph = std::unique_ptr<ADDRINFO, AddrInfoDeleter>(head);
+	//ph.reset();
+
+	if (rc != 0)
+	{
+		std::stringstream ss;
+		ss << __FILE__ << ": getaddrinfo failed: " << rc << " Invalid address: " << address.c_str();
+		WriteLine(ss.str());
+		return NULL;
+	}
+	else
+	{
+		auto h = head;
+		while (h->ai_next)
+		{
+			WriteResolvedAddress(h->ai_addr, int(h->ai_addrlen));
+			h = h->ai_next;
+		}
+		WriteResolvedAddress(h->ai_addr, int(h->ai_addrlen));
+	}
+
+	return head;
+}
+
+size_t ClayEngine::Networking::AddressResolver::MeasureAddressLength(ADDRINFO* address)
+{
+	size_t len = 0;
+	ADDRINFO* ptr = address;
+	if (ptr)
+	{
+		++len;
+		while (ptr->ai_next)
+		{
+			++len;
+			ptr = ptr->ai_next;
+		}
+	}
+	return len;
+}
+
+void ClayEngine::Networking::AddressResolver::FreeAddress(ADDRINFO* ai)
+{
+	freeaddrinfo(ai);
+}
+
+void ClayEngine::Networking::AddressResolver::FreeSocket(SOCKET s)
+{
+	closesocket(s);
+}
+#pragma endregion
 
 #pragma region Listen Server Module
 void ClayEngine::Networking::AcceptThreadFunctor::operator()(std::future<void> future, void* ptr)

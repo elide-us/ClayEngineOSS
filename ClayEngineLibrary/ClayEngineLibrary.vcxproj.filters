@@ -35,10 +35,7 @@
     <ClCompile Include="AsyncNetworkSystem.cpp">
       <Filter>Private\Systems</Filter>
     </ClCompile>
-    <ClCompile Include="ClayEngineHeadless.cpp">
-      <Filter>Private</Filter>
-    </ClCompile>
-    <ClCompile Include="ClayEngineClient.cpp">
+    <ClCompile Include="ClayEngineContext.cpp">
       <Filter>Private</Filter>
     </ClCompile>
   </ItemGroup>
@@ -84,10 +81,7 @@
     <ClInclude Include="AsyncNetworkSystem.h">
       <Filter>Public\Systems</Filter>
     </ClInclude>
-    <ClInclude Include="ClayEngineHeadless.h">
-      <Filter>Public</Filter>
-    </ClInclude>
-    <ClInclude Include="ClayEngineClient.h">
+    <ClInclude Include="ClayEngineContext.h">
       <Filter>Public</Filter>
     </ClInclude>
   </ItemGroup>

@@ -116,4 +116,28 @@ namespace ClayEngine
 		return v;
 	}
 
+	class OutputLog
+	{
+		UnicodeStrings m_log = {};
+
+	public:
+		OutputLog() = default;
+		~OutputLog() = default;
+
+		void Add(Unicode message)
+		{
+			std::wstringstream wss;
+			wss << L"[" << std::setfill(L'0') << std::setw(8) << std::this_thread::get_id() << L"] " << message << std::endl;
+
+			m_log.push_back(wss.str());
+		}
+		void Add(String message)
+		{
+			std::wstringstream wss;
+			wss << message.c_str();
+
+			Add(wss.str());
+		}
+	};
+	using OutputLogPtr = std::unique_ptr<OutputLog>;
 }
