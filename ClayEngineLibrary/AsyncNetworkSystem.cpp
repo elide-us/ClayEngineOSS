@@ -106,7 +106,7 @@ void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListen
         AsyncListenServerModule::AcceptSocketData* opData = nullptr;
         bool isAcceptDataReady = false;
 
-        const DWORD bufferLength = c_dwReceiveDataLength + c_dwLocalAddressLength + c_dwRemoteAddressLength;
+        const DWORD bufferLength = c_listen_recvdata_length + c_listen_local_addr_length + c_listen_remote_addr_length;
 
         if (!isAcceptDataReady)
         {
@@ -136,9 +136,9 @@ void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListen
                 context->GetListenSocket(),
                 opData->Socket,
                 opData->Buffer,
-                c_dwReceiveDataLength,
-                c_dwLocalAddressLength, // Size of local address buffer
-                c_dwRemoteAddressLength, // Size of remote address buffer
+                c_listen_recvdata_length,
+                c_listen_local_addr_length, // Size of local address buffer
+                c_listen_remote_addr_length, // Size of remote address buffer
                 &bytesReceived,
                 &opData->Overlapped // Overlapped structure to be notified when the operation completes
                 );
@@ -169,8 +169,8 @@ void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListen
             SOCKADDR* remoteAddr = nullptr;
             int localAddrLen = 0;
             int remoteAddrLen = 0;
-            context->GetAcceptExSockAddrsFunction()(completedOpData->Buffer, c_dwReceiveDataLength,
-                c_dwLocalAddressLength, c_dwRemoteAddressLength,
+            context->GetAcceptExSockAddrsFunction()(completedOpData->Buffer, c_listen_recvdata_length,
+                c_listen_local_addr_length, c_listen_remote_addr_length,
                 &localAddr, &localAddrLen,
                 &remoteAddr, &remoteAddrLen
             );
@@ -209,14 +209,18 @@ void ClayEngine::AsyncListenServerFunctor::operator()(FUTURE future, AsyncListen
 			int nLowWaterMark = 16; // Set the low water mark to 16 bytes
 			setsockopt(completedOpData->Socket, SOL_SOCKET, SO_RCVBUF, (const char*)&nLowWaterMark, sizeof(int));
 
-			u_long iMode = 1; // Set the socket to non-blocking
-            ioctlsocket(completedOpData->Socket, FIONBIO, &iMode);
+            ////////////////////////////////////////////////////////////////////////////////
+
+            // Below here is just placeholder code, we'll need to associate
+            // the socket with an IOCP that we haven't created yet to handle
+            // WSASend/WSARecv operations, NBIO is irrelevant, obviously in IOCP
+
+			u_long nbio = 1; // Set the socket to non-blocking
+            ioctlsocket(completedOpData->Socket, FIONBIO, &nbio);
 
             // Create ClientConnectionData to handle the newly accepted client
 			auto remoteAddrIn = reinterpret_cast<SOCKADDR_IN*>(remoteAddr);
             context->MakeClientConnectionData(completedOpData->Socket, localAddr, remoteAddrIn);
-
-            // Associate with IOCP... Perhaps something to be done in the ANS
 
             isAcceptDataReady = false;
         }
@@ -238,7 +242,7 @@ HANDLE ClayEngine::AsyncListenServerModule::createCompletionPort(DWORD listenWor
     return CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, listenWorkers);
 }
 
-SOCKET ClayEngine::AsyncListenServerModule::createListenSocket(int flags, int family, int socktype, int protocol, Unicode address, Unicode port)
+SOCKET ClayEngine::AsyncListenServerModule::createListenSocket(Unicode address, Unicode port, int flags = c_listen_hint_flags, int family = c_listen_hint_family, int socktype = c_listen_hint_socktype, int protocol = c_listen_hint_protocol)
 {
     // Configure hints for the listen socket
     ADDRINFOW hints = {};
@@ -328,13 +332,13 @@ void ClayEngine::AsyncListenServerModule::bindListenSocket()
     }
 }
 
-ClayEngine::AsyncListenServerModule::AsyncListenServerModule(AsyncNetworkSystem* ans, DWORD listenWorkers, int flags, int family, int socktype, int protocol, Unicode address, Unicode port) : m_ans(ans)
+ClayEngine::AsyncListenServerModule::AsyncListenServerModule(AsyncNetworkSystem* ans, DWORD listenWorkers, Unicode address, Unicode port) : m_ans(ans)
 {
     // Create Completion Port
     m_listen_queue = createCompletionPort(listenWorkers);
 
     // Create Listen Socket
-    m_listen_socket = createListenSocket(flags, family, socktype, protocol, address, port);
+    m_listen_socket = createListenSocket(address, port);
 
     // Configure Accept and Bind Listen Socket
     getWSAExtensionFunctions();
@@ -347,7 +351,7 @@ ClayEngine::AsyncListenServerModule::AsyncListenServerModule(AsyncNetworkSystem*
     for (auto i = 0UL; i < listenWorkers; i++)
     {
         auto lt = AsyncListenServerWorker();
-        lt.Thread = THREAD(AsyncListenServerFunctor(), lt.Promise.get_future(), this);
+        lt.Thread = THREAD{ AsyncListenServerFunctor(), std::move(lt.Promise.get_future()), this };
         m_listen_threads.emplace_back(std::move(lt));
     }
 }
@@ -409,22 +413,49 @@ ClayEngine::AsyncNetworkSystem::ClientConnectionData::~ClientConnectionData()
 #pragma endregion
 
 #pragma region Async Network System Implementation
-ClayEngine::AsyncNetworkSystem::AsyncNetworkSystem(AffinityData affinityData)
+ClayEngine::AsyncNetworkSystem::AsyncNetworkSystem(AffinityData affinityData, Unicode className, Document document)
     : m_affinity_data(affinityData)
 {
-    if (FAILED(WSAStartup(MAKEWORD(2, 2), &m_wsaData))) throw std::runtime_error("WSAStartup() failed... WTF?");
+    if (FAILED(WSAStartup(MAKEWORD(2, 2), &m_wsaData))) throw std::runtime_error("ClayEngine::AsyncNetworkSystem WSAStartup() FAILED");
 
-    //TODO: Read json and configure as defined
-
-    try
+    for (const auto& element : document["startup"])
     {
-        m_listen_server = std::make_unique<AsyncListenServerModule>(this);
-    }
-    catch (...)
-    {
-        WSACleanup();
+        if (ToUnicode(element["class"].get<std::string>()) == className)
+        {
+            auto addr = ToUnicode(element["address"].get<std::string>());
+            auto port = ToUnicode(element["port"].get<std::string>());
+			auto type = element["type"].get<std::string>();
 
-        throw std::runtime_error("Failed to create Async Listen Server");
+            if (type == "server" || type == "headless")
+			{
+				// Create a new Async Listen Server
+				try
+				{
+					m_listen_server = std::make_unique<AsyncListenServerModule>(this, 4, addr, port);
+				}
+				catch (...)
+				{
+					WSACleanup();
+
+					throw std::runtime_error("Failed to create Async Listen Server");
+				}
+			}
+
+            if (type == "client")
+            {
+                // Create a new Connection Client
+                try
+                {
+                    m_connect_client = std::make_unique<ConnectClientModule>(this, addr, port);
+                }
+                catch (...)
+                {
+                    WSACleanup();
+
+                    throw std::runtime_error("Failed to create Client Connection");
+                }
+            }
+        }
     }
 }
 
@@ -435,6 +466,7 @@ ClayEngine::AsyncNetworkSystem::~AsyncNetworkSystem()
         element.reset();
     }
 
+    if (m_connect_client) m_connect_client.reset();
     if (m_listen_server) m_listen_server.reset();
 
     WSACleanup();
@@ -450,54 +482,157 @@ void ClayEngine::AsyncNetworkSystem::MakeClientConnectionData(SOCKET socket, SOC
 }
 #pragma endregion
 
-bool ClayEngine::ClientConnectionModule::tryConnectToServer()
+#pragma region Connect Client Module Implementation
+SOCKET ClayEngine::ConnectClientModule::createConnectSocket(Unicode address, Unicode port, int family, int socktype, int protocol)
 {
-	if (connect(m_socket, reinterpret_cast<SOCKADDR*>(&m_sockAddr), sizeof(SOCKADDR)) == SOCKET_ERROR)
+    if (FAILED(InetPtonW(family, address.c_str(), &m_connect_sockinfo.sin_addr.s_addr)))
+    {
+        WSACleanup();
+        throw std::runtime_error("ClayEngine::ConnectClientModule FAILED");
+    }
+    m_connect_sockinfo.sin_port = htons(static_cast<u_short>(std::stoi(port.c_str())));
+	m_connect_sockinfo.sin_family = ADDRESS_FAMILY(family);
+
+	auto hSocket = WSASocketW(family, socktype, protocol, NULL, 0, 0);
+	if (hSocket == INVALID_SOCKET)
 	{
-		auto rc = ProcessWSALastError();
-		if (rc != WSAEWOULDBLOCK) return false;
+		WSACleanup();
+		throw std::runtime_error("ClayEngine::ConnectClientModule FAILED");
 	}
 
-    return true;
-}
-
-ClayEngine::ClientConnectionModule::ClientConnectionModule(Unicode address, Unicode port)
-{
-    WSADATA wsaData;
-    WSAStartup(MAKEWORD(2, 2), &wsaData);
-
-    ADDRINFO hints = {};
-	hints.ai_family = AF_INET;
-
-    // Create a basic socket
-    m_socket = socket(hints.ai_family, SOCK_STREAM, IPPROTO_TCP);
-    if (m_socket == INVALID_SOCKET) throw;
-
-    // Set the socket to non-blocking
-    u_long iMode = 1;
-    if (ioctlsocket(m_socket, FIONBIO, &iMode) == SOCKET_ERROR) throw;
-
-    // Convert address to network address
-    if (FAILED(InetPtonW(hints.ai_family, address.c_str(), &m_sockAddr.sin_addr.s_addr))) throw;
-    
-    // Convert port to network port
-    m_sockAddr.sin_port = htons(static_cast<u_short>(std::stoi(port.c_str())));
-    
-	// Set the address family
-    m_sockAddr.sin_family = ADDRESS_FAMILY(hints.ai_family);
-
-
-    while (!tryConnectToServer())
+    u_long nbio = 1;
+    if (ioctlsocket(hSocket, FIONBIO, &nbio) == SOCKET_ERROR)
     {
-        continue;
+        WSACleanup();
+        throw std::runtime_error("ClayEngine::ConnectClientModule FAILED");
     }
 
-    WriteLine("WSA SUCCESS: ClientConnectionModule connected!");
+	return hSocket;
 }
 
-ClayEngine::ClientConnectionModule::~ClientConnectionModule()
+ClayEngine::ConnectClientModule::ConnectClientModule(AsyncNetworkSystem* ans, Unicode address, Unicode port)
 {
-    shutdown(m_socket, SD_BOTH);
-    closesocket(m_socket);
-    WSACleanup();
+    m_connect_address = address;
+    m_connect_port = port;
+
+    // Create a basic socket
+	m_connect_socket = createConnectSocket(m_connect_address, m_connect_port);
 }
+
+ClayEngine::ConnectClientModule::~ConnectClientModule()
+{
+    DisconnectFromServer();
+}
+void ClayEngine::ConnectClientModule::ConnectToServer()
+{
+    while (m_tryToConnect)
+    {
+        if (m_connect_socket == INVALID_SOCKET)
+        {
+            m_connect_socket = createConnectSocket(m_connect_address, m_connect_port);
+        }
+
+        auto rc = connect(m_connect_socket, reinterpret_cast<SOCKADDR*>(&m_connect_sockinfo), sizeof(SOCKADDR_IN));
+        if (rc == SOCKET_ERROR)
+        {
+            auto ec = WSAGetLastError();
+            if (ec == WSAEWOULDBLOCK || ec == WSAEINPROGRESS)
+            {
+                fd_set writeSet;
+                FD_ZERO(&writeSet);
+                FD_SET(m_connect_socket, &writeSet);
+
+                timeval timeout;
+                timeout.tv_sec = 5;  // 5-second timeout
+                timeout.tv_usec = 0;
+
+                int selectResult = select(0, NULL, &writeSet, NULL, &timeout);
+                if (selectResult > 0)
+                {
+                    // Socket is writable; check for errors
+                    int optVal;
+                    int optLen = sizeof(optVal);
+                    if (getsockopt(m_connect_socket, SOL_SOCKET, SO_ERROR, (char*)&optVal, &optLen) == 0)
+                    {
+                        if (optVal == 0)
+                        {
+                            m_tryToConnect = false;
+                        }
+                        else
+                        {
+                            // Connection failed
+                            std::stringstream ss;
+                            ss << "Connect failed with error: " << optVal;
+                            throw std::runtime_error(ss.str());
+                        }
+                    }
+                    else
+                    {
+                        ec = WSAGetLastError();
+                        std::stringstream ss;
+                        ss << "getsockopt failed with error: " << ec;
+                        throw std::runtime_error(ss.str());
+                    }
+                }
+                else if (ec == WSAEINPROGRESS)
+                {
+                    // Connection in progress, fuggetaboutit...
+                }
+                else
+                {
+                    std::stringstream ss;
+                    ss << "connect failed with error: " << ec;
+                    throw std::runtime_error(ss.str());
+                }
+            }
+        }
+    }
+
+    // Set socket options as needed
+    BOOL bNoDelay = TRUE;
+    setsockopt(m_connect_socket, IPPROTO_TCP, TCP_NODELAY, (const char*)&bNoDelay, sizeof(BOOL));
+
+    int nSendBufSize = 64 * 1024;  // 64KB send buffer
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_SNDBUF, (const char*)&nSendBufSize, sizeof(int));
+
+    int nRecvBufSize = 64 * 1024;  // 64KB recv buffer
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_RCVBUF, (const char*)&nRecvBufSize, sizeof(int));
+
+    BOOL bKeepAlive = TRUE;  // Enable keep-alive
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_KEEPALIVE, (const char*)&bKeepAlive, sizeof(BOOL));
+
+    // Keep-alive settings
+    tcp_keepalive keepalive;
+    keepalive.onoff = 1;
+    keepalive.keepalivetime = 60000;        // 60 seconds
+    keepalive.keepaliveinterval = 10000;    // 10 seconds
+    DWORD dwBytesReturned = 0;
+    WSAIoctl(m_connect_socket, SIO_KEEPALIVE_VALS, &keepalive, sizeof(tcp_keepalive), NULL, 0, &dwBytesReturned, NULL, NULL);
+
+    BOOL bReuseAddr = TRUE;  // Enable address reuse
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_REUSEADDR, (const char*)&bReuseAddr, sizeof(BOOL));
+
+    linger ling;
+    ling.l_onoff = 1;  // Enable linger
+    ling.l_linger = 0;  // Discard unsent data
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_LINGER, (const char*)&ling, sizeof(linger));
+
+    int nLowWaterMark = 16;  // Set the low water mark
+    setsockopt(m_connect_socket, SOL_SOCKET, SO_RCVBUF, (const char*)&nLowWaterMark, sizeof(int));
+
+    // Socket is now connected and configured
+    // Future work can handle connection refused, and logic to break out of the loop 
+    // before the connection is established, i.e. setting connected = true
+}
+
+void ClayEngine::ConnectClientModule::DisconnectFromServer()
+{
+    if (m_connect_socket != INVALID_SOCKET)
+    {
+        shutdown(m_connect_socket, SD_BOTH);
+        closesocket(m_connect_socket);
+        m_connect_socket = INVALID_SOCKET;
+    }
+}
+#pragma endregion
+

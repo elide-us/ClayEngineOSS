@@ -8,6 +8,7 @@
 /******************************************************************************/
 
 #include "Strings.h"
+#include "Storage.h"
 #include "Services.h"
 
 namespace ClayEngine
@@ -27,11 +28,12 @@ namespace ClayEngine
 		UINT m_show_flags = SW_SHOWDEFAULT;
 
         AffinityData m_affinity_data;
+        Document m_document;
 
         ClayEngineContextThread m_thread = {};
 
     public:
-        ClayEngineClient(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName);
+        ClayEngineClient(Document document, HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName);
         ~ClayEngineClient();
 
         void SetContextAffinity(Affinity affinity);
@@ -47,10 +49,11 @@ namespace ClayEngine
 		UINT m_show_flags = SW_SHOWDEFAULT;
 
         AffinityData m_affinity_data;
+		Document m_document;
 
         ClayEngineContextThread m_thread;
     public:
-		ClayEngineServer(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName);
+		ClayEngineServer(Document document, HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName);
 		~ClayEngineServer();
 
 		void SetContextAffinity(Affinity affinity);
@@ -62,11 +65,12 @@ namespace ClayEngine
 	class ClayEngineHeadless
 	{
 		AffinityData m_affinity_data;
+        Document m_document;
 
 		ClayEngineContextThread m_thread;
 
 	public:
-		ClayEngineHeadless(Affinity affinity, Unicode className);
+		ClayEngineHeadless(Document document, Affinity affinity, Unicode className);
 		~ClayEngineHeadless();
 
 		void SetContextAffinity(Affinity affinity);

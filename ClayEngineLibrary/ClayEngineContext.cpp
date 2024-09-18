@@ -15,7 +15,7 @@ namespace ClayEngine
     /// </summary>
     struct ClayEngineClientEntryPoint
     {
-        int operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClient* context);
+        int operator()(Document document, HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClient* context);
     };
 
     /// <summary>
@@ -23,7 +23,7 @@ namespace ClayEngine
     /// </summary>
     struct ClayEngineServerEntryPoint
     {
-		int operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineServer* context);
+		int operator()(Document document, HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineServer* context);
     };
 
     /// <summary>
@@ -31,16 +31,17 @@ namespace ClayEngine
     /// </summary>
     struct ClayEngineHeadlessEntryPoint
     {
-		int operator()(Unicode className, FUTURE future, ClayEngineHeadless* context);
+		int operator()(Document document, Unicode className, FUTURE future, ClayEngineHeadless* context);
     };
 }
 
 #pragma region ClayEngineClient Setup
-ClayEngine::ClayEngineClient::ClayEngineClient(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName)
+ClayEngine::ClayEngineClient::ClayEngineClient(Document document, HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName)
     : m_instance_handle(hInstance)
 {
+    m_document = document;
     m_affinity_data.root_thread = pRoot;
-    m_thread.Thread = THREAD{ ClayEngineClientEntryPoint(), hInstance, m_show_flags, className, windowName, std::move(m_thread.Promise.get_future()), this };
+    m_thread.Thread = THREAD{ ClayEngineClientEntryPoint(), document, hInstance, m_show_flags, className, windowName, std::move(m_thread.Promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineClient::~ClayEngineClient()
@@ -60,7 +61,7 @@ const ClayEngine::AffinityData& ClayEngine::ClayEngineClient::GetAffinityData() 
 }
 #pragma endregion
 
-int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClient* context)
+int ClayEngine::ClayEngineClientEntryPoint::operator()(Document document, HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineClient* context)
 {
     context->SetContextAffinity(std::this_thread::get_id());
     auto _affinity = context->GetAffinityData();
@@ -70,9 +71,10 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
     //auto _input = Services::MakeService<InputSystem>(_affinity);
 
     auto _resources = Services::MakeService<DX11Resources>(_affinity);
+
     auto _content = Services::MakeService<ContentSystem>(_affinity);
 
-    auto _network = std::make_unique<ClientConnectionModule>(L"127.0.0.1", L"19740");
+    auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity, className, document);
 
     //auto _timing = Services::MakeService<TimingSystem>(_affinity);
     
@@ -97,11 +99,12 @@ int ClayEngine::ClayEngineClientEntryPoint::operator()(HINSTANCE hInstance, UINT
 }
 
 #pragma region ClayEngineServer Setup
-ClayEngine::ClayEngineServer::ClayEngineServer(HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName)
+ClayEngine::ClayEngineServer::ClayEngineServer(Document document, HINSTANCE hInstance, Affinity pRoot, Unicode className, Unicode windowName)
 	: m_instance_handle(hInstance)
 {
+    m_document = document;
 	m_affinity_data.root_thread = pRoot;
-	m_thread.Thread = THREAD{ ClayEngineServerEntryPoint(), hInstance, m_show_flags, className, windowName, std::move(m_thread.Promise.get_future()), this };
+	m_thread.Thread = THREAD{ ClayEngineServerEntryPoint(), document, hInstance, m_show_flags, className, windowName, std::move(m_thread.Promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineServer::~ClayEngineServer()
@@ -121,14 +124,14 @@ const ClayEngine::AffinityData& ClayEngine::ClayEngineServer::GetAffinityData() 
 }
 #pragma endregion
 
-int ClayEngine::ClayEngineServerEntryPoint::operator()(HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineServer* context)
+int ClayEngine::ClayEngineServerEntryPoint::operator()(Document document, HINSTANCE hInstance, UINT nCmdShow, Unicode className, Unicode windowName, FUTURE future, ClayEngineServer* context)
 {
     context->SetContextAffinity(std::this_thread::get_id());
     auto _affinity = context->GetAffinityData();
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
 
-	//auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity);
+	auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity, className, document);
 
     while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
     {
@@ -149,10 +152,11 @@ int ClayEngine::ClayEngineServerEntryPoint::operator()(HINSTANCE hInstance, UINT
 }
 
 #pragma region ClayEngineHeadless Setup
-ClayEngine::ClayEngineHeadless::ClayEngineHeadless(Affinity affinity, Unicode className)
+ClayEngine::ClayEngineHeadless::ClayEngineHeadless(Document document, Affinity pRoot, Unicode className)
 {
-	m_affinity_data.root_thread = affinity;
-	m_thread.Thread = THREAD{ ClayEngineHeadlessEntryPoint(), className, std::move(m_thread.Promise.get_future()), this };
+	m_document = document;
+	m_affinity_data.root_thread = pRoot;
+	m_thread.Thread = THREAD{ ClayEngineHeadlessEntryPoint(), document, className, std::move(m_thread.Promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineHeadless::~ClayEngineHeadless()
@@ -172,7 +176,7 @@ const ClayEngine::AffinityData& ClayEngine::ClayEngineHeadless::GetAffinityData(
 }
 #pragma endregion
 
-int ClayEngine::ClayEngineHeadlessEntryPoint::operator()(Unicode className, FUTURE future, ClayEngineHeadless* context)
+int ClayEngine::ClayEngineHeadlessEntryPoint::operator()(Document document, Unicode className, FUTURE future, ClayEngineHeadless* context)
 {
 	context->SetContextAffinity(std::this_thread::get_id());
 	auto _affinity = context->GetAffinityData();
@@ -185,7 +189,7 @@ int ClayEngine::ClayEngineHeadlessEntryPoint::operator()(Unicode className, FUTU
         _wfreopen_s(&file, L"CONOUT$", L"w", stderr);
     }
 
-    auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity);
+    auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity, className, document);
 
     while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
     {

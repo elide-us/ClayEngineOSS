@@ -26,29 +26,23 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 		{
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
-			//auto _address = element["address"].get<std::string>();
-			//auto _port = element["port"].get<std::string>();
 
-			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
+			m_clients.emplace(_class, std::make_unique<ClayEngineClient>(m_bootstrap->GetDocument(), m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
 		}
 
 		if (_type == "server")
 		{
 			auto _title = element["title"].get<std::string>();
 			auto _class = element["class"].get<std::string>();
-			//auto _address = element["address"].get<std::string>();
-			//auto _port = element["port"].get<std::string>();
 
-			m_servers.emplace(_class, std::make_unique<ClayEngineServer>(m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
+			m_servers.emplace(_class, std::make_unique<ClayEngineServer>(m_bootstrap->GetDocument(), m_hInstance, m_affinity_data.root_thread, ToUnicode(_class), ToUnicode(_title)));
 		}
 
 		if (_type == "headless")
 		{
 			auto _class = element["class"].get<std::string>();
-			//auto _address = element["address"].get<std::string>();
-			//auto _port = element["port"].get<std::string>();
 
-			m_headless.emplace(_class, std::make_unique<ClayEngineHeadless>(m_affinity_data.root_thread, ToUnicode(_class)));
+			m_headless.emplace(_class, std::make_unique<ClayEngineHeadless>(m_bootstrap->GetDocument(), m_affinity_data.root_thread, ToUnicode(_class)));
 		}
 	}
 
