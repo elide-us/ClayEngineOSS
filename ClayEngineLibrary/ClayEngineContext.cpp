@@ -131,7 +131,7 @@ int ClayEngine::ClayEngineServerEntryPoint::operator()(Document document, HINSTA
 
     auto _window = Services::MakeService<WindowSystem>(_affinity, hInstance, nCmdShow, className, windowName);
 
-	//auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity);
+	auto _network = Services::MakeService<AsyncNetworkSystem>(_affinity, className, document);
 
     while (future.wait_for(std::chrono::milliseconds(0)) == std::future_status::timeout)
     {
@@ -156,7 +156,7 @@ ClayEngine::ClayEngineHeadless::ClayEngineHeadless(Document document, Affinity p
 {
 	m_document = document;
 	m_affinity_data.root_thread = pRoot;
-	m_thread.Thread = THREAD{ ClayEngineHeadlessEntryPoint(), className, std::move(m_thread.Promise.get_future()), this };
+	m_thread.Thread = THREAD{ ClayEngineHeadlessEntryPoint(), document, className, std::move(m_thread.Promise.get_future()), this };
 }
 
 ClayEngine::ClayEngineHeadless::~ClayEngineHeadless()

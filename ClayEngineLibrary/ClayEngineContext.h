@@ -8,6 +8,7 @@
 /******************************************************************************/
 
 #include "Strings.h"
+#include "Storage.h"
 #include "Services.h"
 
 namespace ClayEngine
