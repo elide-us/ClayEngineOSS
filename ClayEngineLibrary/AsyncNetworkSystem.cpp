@@ -388,6 +388,20 @@ void ClayEngine::AsyncListenServerModule::MakeClientConnectionData(SOCKET socket
 }
 #pragma endregion
 
+
+struct ClayEngine::AsyncBulkDataServerWorker
+{
+    THREAD Thread;
+    PROMISE Promise = {};
+};
+
+
+
+
+
+
+
+
 #pragma region Async Network System - Client Connection Data Implementation
 struct ClayEngine::AsyncNetworkSystem::ClientConnectionData
 {
@@ -523,6 +537,7 @@ ClayEngine::ConnectClientModule::~ConnectClientModule()
 {
     DisconnectFromServer();
 }
+
 void ClayEngine::ConnectClientModule::ConnectToServer()
 {
     while (m_tryToConnect)

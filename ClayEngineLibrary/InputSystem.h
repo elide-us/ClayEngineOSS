@@ -12,6 +12,8 @@
 
 #include "InputDevices.h"
 
+#include "GameInput.h"
+
 #include <ctime>
 
 namespace ClayEngine
@@ -725,4 +727,161 @@ namespace ClayEngine
 	//		}
 	//	}
 	//};
+}
+
+#include <future>
+
+namespace Experimental
+{
+	enum Mode
+	{
+		MODE_ABSOLUTE = 0,
+		MODE_RELATIVE,
+	};
+
+	struct State
+	{
+		bool leftButton;
+		bool middleButton;
+		bool rightButton;
+		bool xButton1;
+		bool xButton2;
+		int x;
+		int y;
+		int scrollWheelValue;
+		Mode positionMode;
+	};
+
+	enum ButtonState
+	{
+		UP = 0,       // Button is up
+		HELD = 1,     // Button is held down
+		RELEASED = 2, // Button was just released
+		PRESSED = 3,  // Button was just pressed
+	};
+
+	class ButtonStateTracker
+	{
+		// Private member variables
+		State lastState;
+
+	public:
+		ButtonState leftButton;
+		ButtonState middleButton;
+		ButtonState rightButton;
+		ButtonState xButton1;
+		ButtonState xButton2;
+
+		ButtonStateTracker() noexcept
+		{
+			Reset();
+		}
+
+		void Update(const State& state) noexcept;
+
+		void Reset() noexcept;
+
+		State GetLastState() const noexcept
+		{
+			return lastState;
+		}
+	};
+	using ButtonStateTrackerPtr = std::unique_ptr<ButtonStateTracker>;
+
+	class Mouse;
+	struct MouseMessageHandler
+	{
+		void operator()(std::future<void> future, UINT message, WPARAM wParam, LPARAM lParam, Mouse* context);
+	};
+
+	class Mouse
+	{
+		//AffinityData m_affinity_data;
+
+		std::thread m_thread;
+		std::promise<void> m_promise;
+
+		HWND mWindow;
+
+
+
+		State mState;
+		Mode mMode;
+
+		int mLastX;
+		int mLastY;
+		int mRelativeX;
+		int mRelativeY;
+
+		bool mInFocus;
+
+		bool mAutoReset;
+
+		// Handles for synchronization
+		HANDLE mScrollWheelValue;
+		HANDLE mRelativeRead;
+		HANDLE mAbsoluteMode;
+		HANDLE mRelativeMode;
+
+	public:
+		Mouse() noexcept(false);
+		Mouse(Mouse&&) = delete;
+		Mouse& operator=(Mouse&&) = delete;
+		Mouse(Mouse const&) = delete;
+		Mouse& operator=(Mouse const&) = delete;
+		virtual ~Mouse();
+
+		// Retrieve the current state of the mouse
+		State GetState() const;
+
+		// Resets the accumulated scroll wheel value
+		void ResetScrollWheelValue() noexcept;
+
+		// Sets mouse mode (defaults to absolute)
+		void SetMode(Mode mode);
+
+
+
+		// THe next two functions might be related to GameInput functionality...
+
+		// Signals the end of frame (recommended, but optional)
+		void EndOfInputFrame() noexcept;
+
+		// Feature detection
+		bool IsConnected() const;
+
+
+
+
+		// Cursor visibility
+		bool IsVisible() const noexcept;
+		void SetVisible(bool visible);
+
+		// Window management
+		void SetWindow(HWND window);
+	};
+	
+
+
+
+
+
+
+
+
+	class InputSystem
+	{
+		// Keyboard
+
+		// Mouse
+
+
+		// Gamepad
+
+	public:
+		InputSystem() = default;
+		~InputSystem() = default;
+
+
+	};
 }

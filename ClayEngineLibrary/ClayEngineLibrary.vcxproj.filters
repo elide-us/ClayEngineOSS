@@ -84,6 +84,9 @@
     <ClInclude Include="ClayEngineContext.h">
       <Filter>Public</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\GameInput.h">
+      <Filter>Public\Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Private">
