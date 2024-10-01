@@ -23,6 +23,7 @@
 #include "Strings.h"
 
 #define ClayMemZero(Address, Length) memset(Address, 0, Length)
+#define ClayMemCopy(Destination, Source, Length) memcpy(Destination, Source, Length)
 
 namespace ClayEngine
 {
