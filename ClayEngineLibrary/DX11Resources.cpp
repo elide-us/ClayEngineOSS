@@ -238,22 +238,76 @@ void ClayEngine::DX11Resources::StartPipeline()
 		if (FAILED(_hr)) throw std::exception("MakeWindowAssociation");
 
 		// UpdateColorSpace()
-
-		_hr = m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_context.ReleaseAndGetAddressOf()));
-		if (FAILED(_hr)) throw std::exception("GetBuffer");
-
-
-		// RTV Desc
-
-			// If we got a format? (not UNKNOWN)
-			// Create Depth Stencil and View
-
-		// Set Viewport
 	}
+
+	HRESULT _hr = m_swapchain->GetBuffer(0, IID_PPV_ARGS(m_rendertarget_context.ReleaseAndGetAddressOf()));
+	if (FAILED(_hr)) throw std::exception("GetBuffer");
+
+	D3D11_RENDER_TARGET_VIEW_DESC _rtvd = {};
+	_rtvd.Format = _bbf;
+	_rtvd.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	_rtvd.Texture2D.MipSlice = 0;
+
+	_hr = m_device->CreateRenderTargetView(
+		m_rendertarget_context.Get(),
+		&_rtvd,
+		m_rendertarget.ReleaseAndGetAddressOf());
+	if (FAILED(_hr)) throw std::exception("CreateRenderTargetView");
+
+	D3D11_TEXTURE2D_DESC _dsd = {};
+	_dsd.Width = _bbw;
+	_dsd.Height = _bbh;
+	_dsd.MipLevels = 1;
+	_dsd.ArraySize = 1;
+	_dsd.Format = m_depthbuffer_format;
+	_dsd.SampleDesc.Count = 1;
+	_dsd.SampleDesc.Quality = 0;
+	_dsd.Usage = D3D11_USAGE_DEFAULT;
+	_dsd.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+
+	_hr = m_device->CreateTexture2D(&_dsd, nullptr, m_depthstencil_context.ReleaseAndGetAddressOf());
+	if (FAILED(_hr)) throw std::exception("CreateTexture2D");
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC _dsvd = {};
+	_dsvd.Format = _dsd.Format;
+	_dsvd.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	_dsvd.Texture2D.MipSlice = 0;
+
+	_hr = m_device->CreateDepthStencilView(
+		m_depthstencil_context.Get(),
+		&_dsvd,
+		m_depthstencil.ReleaseAndGetAddressOf());
+	if (FAILED(_hr)) throw std::exception("CreateDepthStencilView");
+
+	m_viewport = {};
+	m_viewport.TopLeftX = 0.0f;
+	m_viewport.TopLeftY = 0.0f;
+	m_viewport.Width = static_cast<FLOAT>(_bbw);
+	m_viewport.Height = static_cast<FLOAT>(_bbh);
+	m_viewport.MinDepth = 0.0f;
+	m_viewport.MaxDepth = 1.0f;
+	m_device_context->RSSetViewports(1, &m_viewport);
 }
 
 void ClayEngine::DX11Resources::StopPipeline()
 {
+	if (m_device_context)
+	{
+		m_device_context->OMSetRenderTargets(0, nullptr, nullptr);
+	}
+
+	if (m_depthstencil_context)
+	{
+		m_depthstencil_context.Reset();
+		m_depthstencil_context = nullptr;
+	}
+
+	if (m_rendertarget_context)
+	{
+		m_rendertarget_context.Reset();
+		m_rendertarget_context = nullptr;
+	}
+
 	if (m_depthstencil)
 	{
 		m_depthstencil.Reset();
