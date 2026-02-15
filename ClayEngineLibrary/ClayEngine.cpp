@@ -4,6 +4,38 @@
 
 #include <DirectXMath.h>
 #include <exception>
+#include <shellapi.h>
+
+namespace
+{
+	ClayEngine::String ResolveBootstrapPath(LPWSTR cmdLine)
+	{
+		if (!cmdLine)
+		{
+			return ClayEngine::c_bootstrap_json;
+		}
+
+		int argc = 0;
+		LPWSTR* argv = CommandLineToArgvW(cmdLine, &argc);
+		if (!argv)
+		{
+			return ClayEngine::c_bootstrap_json;
+		}
+
+		ClayEngine::String bootstrapPath = ClayEngine::c_bootstrap_json;
+		for (int i = 0; i < argc; ++i)
+		{
+			if (std::wstring(argv[i]) == L"--config" && i + 1 < argc)
+			{
+				bootstrapPath = ClayEngine::ToString(argv[i + 1]);
+				break;
+			}
+		}
+
+		LocalFree(argv);
+		return bootstrapPath;
+	}
+}
 
 ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale)
 	: m_hInstance(hInstance), m_cmdLine(lpCmdLine), m_cmdShow(nCmdShow)
@@ -13,8 +45,8 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 
 	m_affinity_data.root_thread = m_affinity_data.this_thread = std::this_thread::get_id();
 
-	// Intentionally hard-coded, this is your default startup file
-	m_bootstrap = std::make_unique<JsonFile>(c_bootstrap_json);
+	const auto bootstrapPath = ResolveBootstrapPath(m_cmdLine);
+	m_bootstrap = std::make_unique<JsonFile>(bootstrapPath);
 
 	auto doc = m_bootstrap->GetDocument();
 	auto& startup = doc["startup"];
@@ -144,7 +176,6 @@ ClayEngine::ClayEngine::~ClayEngine()
 // D - Bronze - Uncommon - Green - 1.5
 // E - Iron - Common - White - 1.25
 // F - Stone - Junk - Grey - 1.0
-
 
 
 
