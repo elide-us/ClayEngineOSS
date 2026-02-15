@@ -8,7 +8,10 @@
 /******************************************************************************/
 
 #include <Windows.h>
+#include <atomic>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 
 #include "Strings.h" // String and error handling
 #include "Storage.h" // Filesystem and JSON parsing
@@ -38,18 +41,19 @@ namespace ClayEngine
 		ServerMap m_servers = {};
 		HeadlessMap m_headless = {};
 
+		std::atomic_bool m_shutdown_requested = false;
+		std::mutex m_lifecycle_mutex;
+		std::condition_variable m_lifecycle_cv;
+
+		void ShutdownContexts();
+
 	public:
 		ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT nCmdShow, Locale pLocale);
 		~ClayEngine();
 
-		void Run()
-		{
-			while (!m_clients.empty() || !m_servers.empty() || !m_headless.empty())
-			{
-				bool unreferencedParameter = false;
-				UNREFERENCED_PARAMETER(unreferencedParameter);
-			}
-		}
+		void RequestShutdown();
+
+		void Run();
 	};
 	using ClayEnginePtr = std::unique_ptr<ClayEngine>;
 
