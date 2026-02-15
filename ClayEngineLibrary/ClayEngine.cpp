@@ -83,23 +83,52 @@ ClayEngine::ClayEngine::ClayEngine(HINSTANCE hInstance, LPWSTR lpCmdLine, UINT n
 
 ClayEngine::ClayEngine::~ClayEngine()
 {
+	RequestShutdown();
+	ShutdownContexts();
+
+	m_bootstrap.reset();
+	CoUninitialize();
+}
+
+void ClayEngine::ClayEngine::RequestShutdown()
+{
+	m_shutdown_requested.store(true);
+	m_lifecycle_cv.notify_all();
+}
+
+void ClayEngine::ClayEngine::Run()
+{
+	if (m_clients.empty() && m_servers.empty() && m_headless.empty())
+	{
+		return;
+	}
+
+	std::unique_lock<std::mutex> lock(m_lifecycle_mutex);
+	m_lifecycle_cv.wait(lock, [this]() { return m_shutdown_requested.load(); });
+	lock.unlock();
+
+	ShutdownContexts();
+}
+
+void ClayEngine::ClayEngine::ShutdownContexts()
+{
 	for (auto& element : m_headless)
 	{
 		element.second.reset();
 	}
+	m_headless.clear();
 
 	for (auto& element : m_servers)
 	{
 		element.second.reset();
 	}
+	m_servers.clear();
 
 	for (auto& element : m_clients)
 	{
 		element.second.reset();
 	}
-
-	m_bootstrap.reset();
-	CoUninitialize();
+	m_clients.clear();
 }
 
 #pragma region Orphaned Code Fragments
@@ -176,6 +205,5 @@ ClayEngine::ClayEngine::~ClayEngine()
 // D - Bronze - Uncommon - Green - 1.5
 // E - Iron - Common - White - 1.25
 // F - Stone - Junk - Grey - 1.0
-
 
 
